@@ -11,7 +11,7 @@ void launch(struct Server *server) {
 
     while (1) {
         char buffer[30000] = {0};
-        printf("Waiting for connection...\n"); // Mírnější formulace
+        printf("Waiting for connection...\n");
 
         int address_length = sizeof(server->address);
         int new_socket = accept(server->socket, (struct sockaddr *)&server->address, (socklen_t *)&address_length);
