@@ -1,41 +1,54 @@
-#include "server.h"
+#include "Server.h"
 #include <unistd.h>
-#include <stdio.h>
+#include <string.h>
+
+#include "servUtil.h"
 
 #ifdef _WIN32
     #define SHUT_RDWR SD_BOTH
 #endif
 
 void launch(struct Server *server) {
-    printf("=== SERVER STARTED ===\n");
+    printf("=== SERVER LAUNCHED ===\n");
 
     while (1) {
-        char buffer[30000] = {0};
+        char request[1000] = {0};
         printf("Waiting for connection...\n");
 
+        char* currentWorkingDirectory="../testWeb/\0";
+        char currentFilePath[256];
+
         int address_length = sizeof(server->address);
-        int new_socket = accept(server->socket, (struct sockaddr *)&server->address, (socklen_t *)&address_length);
-        if (new_socket < 0) {
+        int clientSocket = accept(server->socket, (struct sockaddr *)&server->address, (socklen_t *)&address_length);
+
+        if (clientSocket < 0) {
             perror("Failed to accept a new connection");
             continue;
         }
 
         printf("New connection accepted\n");
-        read(new_socket, buffer, sizeof(buffer) - 1);
-        printf("Received request: %s\n", buffer);
+        read(clientSocket, request, sizeof(request) - 1);
+        printf("Received request: %s\n\n", request);
 
-        char *response =
-        "HTTP/1.1 200 OK\r\n"
-        "Content-Length: 38\r\n"
+        char *requestedFile = getRequestedFile(request);
+        strcpy(currentFilePath, currentWorkingDirectory);
+        strcat(currentFilePath, requestedFile);
+        free(requestedFile);
+
+        char response[1000] = {0};
+        strcpy(response, "HTTP/1.1 200 OK\r\n"
+        "Content-Length: 100\r\n"
         "Content-Type: text/html\r\n"
         "Connection: close\r\n"
-        "\r\n"
-        "<html><body><h1>Hello</h1></body></html>";
+        "\r\n");
+        strcat(response, loadHTMLContent(currentFilePath));
 
-        send(new_socket, response, strlen(response), 0);
+        printf("%s", response);
+
+        send(clientSocket, response, strlen(response), 0);
         printf("Response sent, closing connection.\n");
-        shutdown(new_socket, SHUT_RDWR);
-        close(new_socket);
+        shutdown(clientSocket, SHUT_RDWR);
+        close(clientSocket);
     }
 }
 
@@ -52,3 +65,5 @@ int main() {
     server.launch(&server);
     return 0;
 }
+
+

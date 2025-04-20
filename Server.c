@@ -1,4 +1,4 @@
-#include "server.h"
+#include "Server.h"
 
 struct Server server_constructor(int domain, int service, int protocol, u_long servInterface, int port, int backlog, void (*launch)(struct Server *server)) {
     struct Server server;

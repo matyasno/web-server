@@ -5,6 +5,12 @@ set(CMAKE_CXX_STANDARD 20)
 
 add_executable(Cserver test.c
         Server.c
-        Server.h)
+        Server.h
+        servUtil.c
+        servUtil.h)
 
-target_link_libraries(Cserver ws2_32)
+IF (WIN32)
+    target_link_libraries(Cserver ws2_32)
+ELSE ()
+    target_link_libraries(Cserver)
+ENDIF ()
