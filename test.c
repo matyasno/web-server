@@ -28,12 +28,14 @@ void launch(struct Server *server) {
 
         printf("New connection accepted\n");
         read(clientSocket, request, sizeof(request) - 1);
-        printf("Received request: %s\n\n", request);
+        printf("\n\nReceived request: %s \n\n", request);
 
         char *requestedFile = getRequestedFile(request);
         strcpy(currentFilePath, currentWorkingDirectory);
         strcat(currentFilePath, requestedFile);
         free(requestedFile);
+
+        char* htmlContent = getHTMLContent(currentFilePath);
 
         char response[1000] = {0};
         strcpy(response, "HTTP/1.1 200 OK\r\n"
@@ -41,8 +43,8 @@ void launch(struct Server *server) {
         "Content-Type: text/html\r\n"
         "Connection: close\r\n"
         "\r\n");
-        strcat(response, loadHTMLContent(currentFilePath));
 
+        strcat(response, htmlContent);
         printf("%s", response);
 
         send(clientSocket, response, strlen(response), 0);

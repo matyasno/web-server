@@ -12,7 +12,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-char* loadHTMLContent(const char* path) {
+char* getHTMLContent(const char* path) {
     FILE *file = fopen(path, "r");
     if (file == NULL) {
         printf("File not found: %s\n", path);

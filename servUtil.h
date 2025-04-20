@@ -7,6 +7,6 @@
 
 #endif //SERVUTIL_H
 
-char* loadHTMLContent(const char* path);
+char* getHTMLContent(const char* path);
 
 char* getRequestedFile(const char* request);
