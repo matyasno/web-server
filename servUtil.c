@@ -37,7 +37,8 @@ int getClientRequest(const int clientHandle, char* buff, const size_t buffSize) 
         return 0;
     } else {
         buff[bytesRead] = '\0';
-        //printf("Request received:\n%s\n", buff);
+        //write(STDOUT_FILENO, "Raw request dump:\n", 18); //nefunguje vypis requestu
+        //write(STDOUT_FILENO, buff, bytesRead);
     }
 
     return 0;
@@ -66,7 +67,7 @@ char* getHTMLContent(const char* path) {
         return NULL;
     }
 
-    size_t bytesRead = fread(buffer, 1, size, file);
+    const size_t bytesRead = fread(buffer, 1, size, file);
     if (bytesRead != size) {
         printf("Error reading the file\n");
         free(buffer);
@@ -113,12 +114,13 @@ char* getFilePath(const char* request, const char* currentWorkingDir) {
         reqFile = "";
     }
     sprintf(fullPath,"%s%s",currentWorkingDir, reqFile);
+    free(reqFile);
     return fullPath;
 }
 
 char* buildResponse(const char* HTMLContent) {
     const size_t contentLength = strlen(HTMLContent);
-    const size_t headerLength = 100;
+    const size_t headerLength = 100; // nahradit delkou headers
     const size_t totalLength = headerLength + contentLength;
 
     char* response = malloc(totalLength);
@@ -133,6 +135,19 @@ char* buildResponse(const char* HTMLContent) {
         "Connection: close\r\n"
         "\r\n%s", contentLength, HTMLContent);
 
+    return response;
+}
+
+char* buildNotFoundResponse() {
+    const char* body = "<html><body><h1>404 Not Found</h1></body></html>";
+    const size_t totalLength = strlen(body) + 100; // nahradit delkou headers
+    char* response = malloc(totalLength);
+    snprintf(response, totalLength,
+        "HTTP/1.1 404 Not Found\r\n"
+        "Content-Length: %lu\r\n"
+        "Content-Type: text/html\r\n"
+        "Connection: close\r\n"
+        "\r\n%s", strlen(body), body);
     return response;
 }
 

@@ -18,3 +18,4 @@ char* getHTMLContent(const char* path);
 char* getRequestedFile(const char* request);
 char* getFilePath(const char* request, const char* currentWorkingDir);
 char* buildResponse(const char* HTMLContent);
+char* buildNotFoundResponse();

@@ -24,7 +24,7 @@ void launch(struct Server *server) {
 
         const char* fullPath = getFilePath(request, rootDir);
         const char* HTMLContent = getHTMLContent(fullPath);
-        const char* response = buildResponse(HTMLContent);
+        const char* response = HTMLContent ? buildResponse(HTMLContent) : buildNotFoundResponse();
 
         send(clientHandle, response, strlen(response), 0);
 
