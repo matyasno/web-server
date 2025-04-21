@@ -7,10 +7,38 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+
+int getClientHandle(struct Server *server) {
+    int address_length = sizeof(server->address);
+    int clientSocket = accept(server->socket, (struct sockaddr *)&server->address, (socklen_t *)&address_length);
+
+    if (clientSocket < 0) {
+        perror("Failed to accept a new connection");
+        return 0;
+    }
+
+    return clientSocket;
+}
+
+int getClientRequest(int clientHandle, char* buff, size_t buffSize) {
+    ssize_t bytesRead = read(clientHandle, buff, buffSize);
+
+    if (bytesRead < 0) {
+        perror("Failed to read request");
+        close(clientHandle);
+        return 1;
+    } else if (bytesRead == 0) {
+        printf("Client closed the connection before sending data.\n");
+        close(clientHandle);
+        return 0;
+    } else {
+        buff[bytesRead] = '\0';
+        printf("Request received:\n%s\n", buff);
+    }
+    return 0;
+}
 
 char* getHTMLContent(const char* path) {
     FILE *file = fopen(path, "r");
@@ -20,7 +48,7 @@ char* getHTMLContent(const char* path) {
     }
 
     fseek(file, 0, SEEK_END);
-    long size = ftell(file);
+    const long size = ftell(file);
     rewind(file);
 
     if (size == 0) {
@@ -87,7 +115,6 @@ char* getFilePath(const char* request, const char* currentWorkingDir) {
 
 char* buildResponse(const char* HTMLContent) {
     size_t contentLength = strlen(HTMLContent);
-
     size_t headerLength = 100;
     size_t totalLength = headerLength + contentLength;
 

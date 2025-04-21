@@ -14,33 +14,33 @@ void launch(struct Server *server) {
     while (1) {
         char request[1000] = {0};
         printf("Waiting for connection...\n");
+        const char* rootDir="../testWeb/";
+        int clientHandle=getClientHandle(server);
 
-        char* currentWorkingDirectory="../testWeb/\0";
+        printf("New connection accepted\n");
 
-        int address_length = sizeof(server->address);
-        int clientSocket = accept(server->socket, (struct sockaddr *)&server->address, (socklen_t *)&address_length);
-
-        if (clientSocket < 0) {
-            perror("Failed to accept a new connection");
+        if (getClientRequest(clientHandle,request, sizeof(request)-1) != 0) {
             continue;
         }
 
-        printf("New connection accepted\n");
-        read(clientSocket, request, sizeof(request) - 1);
-
-        const char* fullPath = getFilePath(request, currentWorkingDirectory);
+        const char* fullPath = getFilePath(request, rootDir);
         const char* HTMLContent = getHTMLContent(fullPath);
         const char* response = buildResponse(HTMLContent);
 
-        send(clientSocket, response, strlen(response), 0);
+        send(clientHandle, response, strlen(response), 0);
         printf("\nResponse sent, closing connection.\n");
 
-        free((void*)HTMLContent);
-        free((void*)fullPath);
-        free((void*)response);
+        if (!fullPath || !HTMLContent || !response) {
+            fprintf(stderr, "Error handling request\n");
+            free((void*)fullPath);
+            free((void*)HTMLContent);
+            free((void*)response);
+            close(clientHandle);
+            continue;
+        }
 
-        shutdown(clientSocket, SHUT_RDWR);
-        close(clientSocket);
+        shutdown(clientHandle, SHUT_RDWR);
+        close(clientHandle);
     }
 }
 

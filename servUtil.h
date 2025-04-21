@@ -7,12 +7,14 @@
 
 #endif //SERVUTIL_H
 
+#include "Server.h"
+
+// net shit
+int getClientHandle(struct Server *server);
+int getClientRequest(int clientHandle, char* buff, size_t buffSize);
+
+// parsing/building client requests
 char* getHTMLContent(const char* path);
-
 char* getRequestedFile(const char* request);
-
-void HTMLparser(char* content);
-
 char* getFilePath(const char* request, const char* currentWorkingDir);
-
 char* buildResponse(const char* HTMLContent);
