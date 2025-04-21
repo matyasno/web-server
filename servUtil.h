@@ -10,3 +10,9 @@
 char* getHTMLContent(const char* path);
 
 char* getRequestedFile(const char* request);
+
+void HTMLparser(char* content);
+
+char* getFilePath(const char* request, const char* currentWorkingDir);
+
+char* buildResponse(const char* HTMLContent);

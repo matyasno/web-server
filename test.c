@@ -16,7 +16,6 @@ void launch(struct Server *server) {
         printf("Waiting for connection...\n");
 
         char* currentWorkingDirectory="../testWeb/\0";
-        char currentFilePath[256];
 
         int address_length = sizeof(server->address);
         int clientSocket = accept(server->socket, (struct sockaddr *)&server->address, (socklen_t *)&address_length);
@@ -28,27 +27,18 @@ void launch(struct Server *server) {
 
         printf("New connection accepted\n");
         read(clientSocket, request, sizeof(request) - 1);
-        printf("\n\nReceived request: %s \n\n", request);
 
-        char *requestedFile = getRequestedFile(request);
-        strcpy(currentFilePath, currentWorkingDirectory);
-        strcat(currentFilePath, requestedFile);
-        free(requestedFile);
-
-        char* htmlContent = getHTMLContent(currentFilePath);
-
-        char response[1000] = {0};
-        strcpy(response, "HTTP/1.1 200 OK\r\n"
-        "Content-Length: 100\r\n"
-        "Content-Type: text/html\r\n"
-        "Connection: close\r\n"
-        "\r\n");
-
-        strcat(response, htmlContent);
-        printf("%s", response);
+        const char* fullPath = getFilePath(request, currentWorkingDirectory);
+        const char* HTMLContent = getHTMLContent(fullPath);
+        const char* response = buildResponse(HTMLContent);
 
         send(clientSocket, response, strlen(response), 0);
-        printf("Response sent, closing connection.\n");
+        printf("\nResponse sent, closing connection.\n");
+
+        free((void*)HTMLContent);
+        free((void*)fullPath);
+        free((void*)response);
+
         shutdown(clientSocket, SHUT_RDWR);
         close(clientSocket);
     }
@@ -67,5 +57,3 @@ int main() {
     server.launch(&server);
     return 0;
 }
-
-

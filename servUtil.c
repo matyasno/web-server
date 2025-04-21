@@ -74,3 +74,36 @@ char* getRequestedFile(const char* request) {
     return filename;
 }
 
+char* getFilePath(const char* request, const char* currentWorkingDir) {
+    char* reqFile = getRequestedFile(request);
+    char* fullPath = malloc(strlen(currentWorkingDir) + strlen(reqFile) + 1);
+    if (reqFile == NULL) {
+        printf("File not found: %s\n", reqFile);
+        reqFile = "";
+    }
+    sprintf(fullPath,"%s%s",currentWorkingDir, reqFile);
+    return fullPath;
+}
+
+char* buildResponse(const char* HTMLContent) {
+    size_t contentLength = strlen(HTMLContent);
+
+    size_t headerLength = 100;
+    size_t totalLength = headerLength + contentLength;
+
+    char* response = malloc(totalLength);
+    if (response == NULL) {
+        return NULL;
+    }
+
+    snprintf(response, totalLength,
+        "HTTP/1.1 200 OK\r\n"
+        "Content-Length: %lu\r\n"
+        "Content-Type: text/html\r\n"
+        "Connection: close\r\n"
+        "\r\n%s", contentLength, HTMLContent);
+
+    return response;
+}
+
+
