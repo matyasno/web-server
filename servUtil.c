@@ -25,7 +25,7 @@ int getClientHandle(struct Server *server) {
 }
 
 int getClientRequest(const int clientHandle, char* buff, const size_t buffSize) {
-    const ssize_t bytesRead = read(clientHandle, buff, buffSize);
+    const ssize_t bytesRead = read(clientHandle, buff, buffSize-1);
 
     if (bytesRead < 0) {
         perror("Failed to read request");
