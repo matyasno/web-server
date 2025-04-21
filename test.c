@@ -13,11 +13,10 @@ void launch(struct Server *server) {
 
     while (1) {
         char request[1000] = {0};
-        printf("Waiting for connection...\n");
         const char* rootDir="../testWeb/";
-        int clientHandle=getClientHandle(server);
 
-        printf("New connection accepted\n");
+        printf("Waiting for connection...\n");
+        const int clientHandle=getClientHandle(server);
 
         if (getClientRequest(clientHandle,request, sizeof(request)-1) != 0) {
             continue;
@@ -28,16 +27,12 @@ void launch(struct Server *server) {
         const char* response = buildResponse(HTMLContent);
 
         send(clientHandle, response, strlen(response), 0);
+
         printf("\nResponse sent, closing connection.\n");
 
-        if (!fullPath || !HTMLContent || !response) {
-            fprintf(stderr, "Error handling request\n");
-            free((void*)fullPath);
-            free((void*)HTMLContent);
-            free((void*)response);
-            close(clientHandle);
-            continue;
-        }
+        free((void*)fullPath);
+        free((void*)HTMLContent);
+        free((void*)response);
 
         shutdown(clientHandle, SHUT_RDWR);
         close(clientHandle);

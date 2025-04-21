@@ -17,13 +17,15 @@ int getClientHandle(struct Server *server) {
     if (clientSocket < 0) {
         perror("Failed to accept a new connection");
         return 0;
+    } else {
+        printf("Client connected successfully\n");
     }
 
     return clientSocket;
 }
 
-int getClientRequest(int clientHandle, char* buff, size_t buffSize) {
-    ssize_t bytesRead = read(clientHandle, buff, buffSize);
+int getClientRequest(const int clientHandle, char* buff, const size_t buffSize) {
+    const ssize_t bytesRead = read(clientHandle, buff, buffSize);
 
     if (bytesRead < 0) {
         perror("Failed to read request");
@@ -35,8 +37,9 @@ int getClientRequest(int clientHandle, char* buff, size_t buffSize) {
         return 0;
     } else {
         buff[bytesRead] = '\0';
-        printf("Request received:\n%s\n", buff);
+        //printf("Request received:\n%s\n", buff);
     }
+
     return 0;
 }
 
@@ -114,9 +117,9 @@ char* getFilePath(const char* request, const char* currentWorkingDir) {
 }
 
 char* buildResponse(const char* HTMLContent) {
-    size_t contentLength = strlen(HTMLContent);
-    size_t headerLength = 100;
-    size_t totalLength = headerLength + contentLength;
+    const size_t contentLength = strlen(HTMLContent);
+    const size_t headerLength = 100;
+    const size_t totalLength = headerLength + contentLength;
 
     char* response = malloc(totalLength);
     if (response == NULL) {
