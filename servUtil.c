@@ -66,6 +66,20 @@ int get_requested_file(const char* request, char* buff, const size_t buffSize) {
     return 0;
 }
 
+int get_request_method(const char* request, char* buff, const size_t buffSize) {
+    char method[8], path[256];
+
+    if (sscanf(request, "%7s %255s", method, path) != 2) {
+        fprintf(stderr, "Invalid request format.\n");
+        return -1;
+    }
+    if (buffSize < strlen(method) + 1) {
+        return -2;
+    }
+    strcpy(buff, method);
+    return 0;
+}
+
 int get_file_path(const char* request, const char* currentWorkingDir, char* buff, const size_t buffSize) {
     char reqFile[1024] = {0};
 
@@ -81,13 +95,13 @@ int get_file_path(const char* request, const char* currentWorkingDir, char* buff
     return 0;
 }
 
-int get_HTML_content(const char* request, const char* rootDir, char* buff, const size_t buffSize) {
+int get_file_content(const char* request, const char* rootDir, char* buff, const size_t buffSize) {
     char path[1024] = {0};
     if (get_file_path(request, rootDir, path, sizeof(path)) != 0) {
         return 1;
     }
 
-    FILE *file = fopen(path, "r");
+    FILE *file = fopen(path, "rb");
     if (file == NULL) {
         printf("File not found: %s\n", path);
         return -1;
@@ -110,9 +124,39 @@ int get_HTML_content(const char* request, const char* rootDir, char* buff, const
 }
 
 int build_response(const char* request, const char* rootDir, char* buff, const size_t buffSize) {
-    char htmlbuffer[4000];
     int written=0;
-    if (get_HTML_content(request, rootDir, htmlbuffer, sizeof(htmlbuffer)) < 0) {
+    char method[8];
+    get_request_method(request, method, sizeof(method));
+    if (strcmp(method,"GET")==0) {
+        handle_get(request, rootDir, buff, buffSize);
+        return 0;
+    } else if (strcmp(method,"HEAD")==0) {
+        handle_head(request, rootDir, buff, buffSize);
+    } else if (strcmp(method,"POST")==0) {
+        handle_post(request, rootDir, buff, buffSize);
+    } else if (strcmp(method,"PUT")==0) {
+        handle_put(request, rootDir, buff, buffSize);
+    } else if (strcmp(method,"DELETE")==0) {
+        handle_delete(request, rootDir, buff, buffSize);
+    } else if (strcmp(method,"OPTIONS")==0) {
+        handle_options(request, rootDir, buff, buffSize);
+    } else if (strcmp(method,"PATCH")==0) {
+        handle_patch(request, rootDir, buff, buffSize);
+    } else if (strcmp(method,"CONNECT")==0) {
+        handle_connect(request, rootDir, buff, buffSize);
+    } else if (strcmp(method,"TRACE")==0) {
+        handle_trace(request, rootDir, buff, buffSize);
+    } else {
+        fprintf(stderr, "Unknown method: %s\n", method);
+    }
+
+    return 1;
+}
+
+int handle_get(const char* request, const char* rootDir, char* buff, const size_t buffSize) {
+    char filecontent[4000]={0};
+    int written;
+    if (get_file_content(request, rootDir, filecontent, sizeof(filecontent)) < 0) {
         const char* body = "<html><body><h1>404 Not Found</h1></body></html>";
         written = snprintf(buff, buffSize,
             "HTTP/1.1 404 Not Found\r\n"
@@ -123,18 +167,43 @@ int build_response(const char* request, const char* rootDir, char* buff, const s
 
         return (written >= 0 && (size_t)written < buffSize) ? 0 : -1;
     } else {
-        const size_t contentLength = strlen(htmlbuffer);
+        const size_t contentLength = strlen(filecontent);
         const char* mime_type = get_mime_type(request, rootDir);
         written = snprintf(buff, buffSize,
             "HTTP/1.1 200 OK\r\n"
             "Content-Length: %zu\r\n"
             "Content-Type: %s\r\n"
             "Connection: close\r\n"
-            "\r\n%s", contentLength, mime_type, htmlbuffer);
+            "\r\n%s", contentLength, mime_type, filecontent);
+        return (written >= 0 && (size_t)written < buffSize) ? 0 : -1;
     }
-
-    return (written >= 0 && (size_t)written < buffSize) ? 0 : -1;
+    return 1;
 }
+int handle_head(const char* request, const char* rootDir, char* buff, const size_t buffSize) {
+    return 1;
+}
+int handle_post(const char* request, const char* rootDir, char* buff, const size_t buffSize) {
+    return 1;
+}
+int handle_put(const char* request, const char* rootDir, char* buff, const size_t buffSize) {
+    return 1;
+}
+int handle_delete(const char* request, const char* rootDir, char* buff, const size_t buffSize) {
+    return 1;
+}
+int handle_options(const char* request, const char* rootDir, char* buff, const size_t buffSize) {
+    return 1;
+}
+int handle_patch(const char* request, const char* rootDir, char* buff, const size_t buffSize) {
+    return 1;
+}
+int handle_connect(const char* request, const char* rootDir, char* buff, const size_t buffSize) {
+    return 1;
+}
+int handle_trace(const char* request, const char* rootDir, char* buff, const size_t buffSize) {
+    return 1;
+}
+
 
 const char* get_mime_type(const char* request, const char* rootDir) {
     char path[1024] = {0};
