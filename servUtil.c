@@ -105,10 +105,10 @@ int get_HTML_content(const char* request, const char* rootDir, char* buff, const
     return 0;
 }
 
-int build_response(const char* reqeust, const char* rootDir, char* buff, const size_t buffSize) {
+int build_response(const char* request, const char* rootDir, char* buff, const size_t buffSize) {
     char htmlbuffer[4000];
     int written=0;
-    if (get_HTML_content(reqeust, rootDir, htmlbuffer, sizeof(htmlbuffer)) < 0) {
+    if (get_HTML_content(request, rootDir, htmlbuffer, sizeof(htmlbuffer)) < 0) {
         const char* body = "<html><body><h1>404 Not Found</h1></body></html>";
         written = snprintf(buff, buffSize,
             "HTTP/1.1 404 Not Found\r\n"
