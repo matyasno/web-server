@@ -7,7 +7,7 @@
     #define SHUT_RDWR SD_BOTH
 #endif
 
-#define CONTENT_SIZE 500000
+#define CONTENT_SIZE 5000
 #define REQUEST_SIZE 1000
 
 void launch(struct Server *server) {

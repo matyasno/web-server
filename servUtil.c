@@ -183,7 +183,7 @@ int handle_get(const char* request, const char* rootDir, char* buff, const size_
     char filecontent[CONTENT_SIZE];
     int written;
     if (get_file_content(request, rootDir, filecontent, sizeof(filecontent)) < 0) {
-        const char* body = "<html><body><h1>404 Not Found</h1></body></html>";
+        const char* body = "<html><body><h1>404 Not Found</h1><a href='index.html'>Go home</a></body></html>";
         written = snprintf(buff, buffSize,
             "HTTP/1.1 404 Not Found\r\n"
             "Content-Length: %zu\r\n"
