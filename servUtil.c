@@ -191,7 +191,7 @@ int handle_get(const char* request, const char* rootDir, char* buff, const size_
             "Connection: close\r\n"
             "\r\n%s", strlen(body), body);
 
-        return (written >= 0 && (size_t)written < buffSize) ? 0 : -1;
+        return (written >= 0 && (size_t)written < buffSize) ? OK : ERROR_OVERFLOW;
     } else {
         const size_t contentLength = strlen(filecontent);
         const char* mime_type = get_mime_type(request, rootDir);
@@ -201,7 +201,7 @@ int handle_get(const char* request, const char* rootDir, char* buff, const size_
             "Content-Type: %s\r\n"
             "Connection: close\r\n"
             "\r\n%s", contentLength, mime_type, filecontent);
-        return (written >= 0 && (size_t)written < buffSize) ? 0 : -1;
+        return (written >= 0 && (size_t)written < buffSize) ? OK : ERROR_OVERFLOW;
     }
     return ERROR_GENERIC;
 }
