@@ -105,14 +105,16 @@ int getHTMLContent(const char* request, const char* rootDir, char* buff, size_t 
     return 0;
 }
 
-int buildResponse(const char* HTMLContent, char* buff, size_t buffSize) {
-    size_t contentLength = strlen(HTMLContent);
+int buildResponse(const char* reqeust, const char* rootDir, char* buff, size_t buffSize) {
+    char htmlbuffer[4000];
+    getHTMLContent(reqeust, rootDir, htmlbuffer, sizeof(htmlbuffer));
+    size_t contentLength = strlen(htmlbuffer);
     int written = snprintf(buff, buffSize,
         "HTTP/1.1 200 OK\r\n"
         "Content-Length: %zu\r\n"
         "Content-Type: text/html\r\n"
         "Connection: close\r\n"
-        "\r\n%s", contentLength, HTMLContent);
+        "\r\n%s", contentLength, htmlbuffer);
 
     return (written >= 0 && (size_t)written < buffSize) ? 0 : -1;
 }

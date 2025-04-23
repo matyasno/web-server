@@ -26,14 +26,11 @@ void launch(struct Server *server) {
         }
 
         char response[5000] = {0};
-        char htmlBuffer[4000] = {0};
 
-        if (getHTMLContent(request, rootDir, htmlBuffer, sizeof(htmlBuffer)) == 0) {
-            buildResponse(htmlBuffer, response, sizeof(response));
-        } else {
-            buildNotFoundResponse(response, sizeof(response));
+        if (buildResponse(request, rootDir, response, sizeof(response)) < 0) {
+            printf("buffer overflow\n");
+            continue;
         }
-
         send(clientHandle, response, strlen(response), 0);
 
         printf("\nResponse sent, closing connection.\n");

@@ -13,9 +13,9 @@
 int getClientHandle(struct Server *server);
 int getClientRequest(int clientHandle, char* buff, size_t buffSize);
 
-// parsing/building client requests
+// parsing requests/building responses
 int getHTMLContent(const char* request, const char* rootDir, char* buff, size_t buffSize);
 int getRequestedFile(const char* request, char* buff, size_t buffSize);
 int getFilePath(const char* request, const char* currentWorkingDir, char* buff, size_t buffSize);
-int buildResponse(const char* HTMLContent, char* buff, size_t buffSize);
-int  buildNotFoundResponse(char* buff, size_t buffSize);
+int buildResponse(const char* reqeust, const char* rootDir, char* buff, size_t buffSize);
+int buildNotFoundResponse(char* buff, size_t buffSize);
