@@ -11,21 +11,20 @@
 
 
 int getClientHandle(struct Server *server) {
-    int address_length = sizeof(server->address);
-    int clientSocket = accept(server->socket, (struct sockaddr *)&server->address, (socklen_t *)&address_length);
+    socklen_t address_length = sizeof(server->address);
+    int clientSocket = accept(server->socket, (struct sockaddr *)&server->address, &address_length);
 
     if (clientSocket < 0) {
         perror("Failed to accept a new connection");
         return 0;
-    } else {
-        printf("Client connected successfully\n");
     }
 
+    printf("Client connected successfully\n");
     return clientSocket;
 }
 
 int getClientRequest(const int clientHandle, char* buff, const size_t buffSize) {
-    const ssize_t bytesRead = read(clientHandle, buff, buffSize-1);
+    ssize_t bytesRead = read(clientHandle, buff, buffSize);
 
     if (bytesRead < 0) {
         perror("Failed to read request");
@@ -35,120 +34,101 @@ int getClientRequest(const int clientHandle, char* buff, const size_t buffSize) 
         printf("Client closed the connection before sending data.\n");
         close(clientHandle);
         return 0;
-    } else {
-        buff[bytesRead] = '\0';
-        //write(STDOUT_FILENO, "Raw request dump:\n", 18); //nefunguje vypis requestu
-        //write(STDOUT_FILENO, buff, bytesRead);
+    }
+
+    buff[bytesRead] = '\0';
+    return 0;
+}
+
+int getRequestedFile(const char* request, char* buff, size_t buffSize) {
+    char method[8], path[256];
+
+    if (sscanf(request, "%7s %255s", method, path) != 2) {
+        fprintf(stderr, "Invalid request format.\n");
+        return -1;
+    }
+
+    const char* requested = (path[0] == '/') ? path + 1 : path;
+    if (strlen(requested) == 0) {
+        requested = "index.html";
+    }
+
+    size_t neededSize = strlen(requested) + 1;
+    if (neededSize > buffSize) {
+        return -2;
+    }
+
+    strcpy(buff, requested);
+    return 0;
+}
+
+int getFilePath(const char* request, const char* currentWorkingDir, char* buff, size_t buffSize) {
+    char reqFile[1024] = {0};
+
+    if (getRequestedFile(request, reqFile, sizeof(reqFile)) != 0) {
+        return -1;
+    }
+
+    if (snprintf(buff, buffSize, "%s%s", currentWorkingDir, reqFile) >= (int)buffSize) {
+        fprintf(stderr, "Full path is too long.\n");
+        return -2;
     }
 
     return 0;
 }
 
-char* getHTMLContent(const char* path) {
+int getHTMLContent(const char* request, const char* rootDir, char* buff, size_t buffSize) {
+    char path[1024] = {0};
+    if (getFilePath(request, rootDir, path, sizeof(path)) != 0) {
+        return 1;
+    }
+
     FILE *file = fopen(path, "r");
     if (file == NULL) {
         printf("File not found: %s\n", path);
-        return NULL;
+        return 1;
     }
 
     fseek(file, 0, SEEK_END);
-    const long size = ftell(file);
+    long size = ftell(file);
     rewind(file);
 
-    if (size == 0) {
+    if (size <= 0 || size >= (long)buffSize) {
         fclose(file);
-        return NULL;
+        return 1;
     }
 
-    char* buffer = (char*) malloc(size + 1);
-    if (buffer == NULL) {
-        printf("Memory allocation failed\n");
-        fclose(file);
-        return NULL;
-    }
-
-    const size_t bytesRead = fread(buffer, 1, size, file);
-    if (bytesRead != size) {
-        printf("Error reading the file\n");
-        free(buffer);
-        fclose(file);
-        return NULL;
-    }
-
-    buffer[size] = '\0';
+    size_t bytesRead = fread(buff, 1, size, file);
+    buff[bytesRead] = '\0';
     fclose(file);
 
-    return buffer;
+    return 0;
 }
 
-char* getRequestedFile(const char* request) {
-    char method[8], path[256];
-
-    sscanf(request, "%7s %255s", method, path);
-
-    char *filename = malloc(strlen(path) + 1);
-    if (filename == NULL) {
-        printf("Memory allocation failed for filename.\n");
-        return NULL;
-    }
-
-    strcpy(filename, path[0] == '/' ? path + 1 : path);
-
-    if (strlen(filename) == 0) {
-        free(filename);
-        filename = strdup("index.html");
-        if (filename == NULL) {
-            printf("Memory allocation failed for default filename.\n");
-            return NULL;
-        }
-    }
-
-    return filename;
-}
-
-char* getFilePath(const char* request, const char* currentWorkingDir) {
-    char* reqFile = getRequestedFile(request);
-    char* fullPath = malloc(strlen(currentWorkingDir) + strlen(reqFile) + 1);
-    if (reqFile == NULL) {
-        printf("File not found: %s\n", reqFile);
-        reqFile = "";
-    }
-    sprintf(fullPath,"%s%s",currentWorkingDir, reqFile);
-    free(reqFile);
-    return fullPath;
-}
-
-char* buildResponse(const char* HTMLContent) {
-    const size_t contentLength = strlen(HTMLContent);
-    const size_t headerLength = 100; // nahradit delkou headers
-    const size_t totalLength = headerLength + contentLength;
-
-    char* response = malloc(totalLength);
-    if (response == NULL) {
-        return NULL;
-    }
-
-    snprintf(response, totalLength,
+int buildResponse(const char* HTMLContent, char* buff, size_t buffSize) {
+    size_t contentLength = strlen(HTMLContent);
+    int written = snprintf(buff, buffSize,
         "HTTP/1.1 200 OK\r\n"
-        "Content-Length: %lu\r\n"
+        "Content-Length: %zu\r\n"
         "Content-Type: text/html\r\n"
         "Connection: close\r\n"
         "\r\n%s", contentLength, HTMLContent);
 
-    return response;
+    return (written >= 0 && (size_t)written < buffSize) ? 0 : -1;
 }
 
-char* buildNotFoundResponse() {
+int buildNotFoundResponse(char* buff, size_t buffSize) {
     const char* body = "<html><body><h1>404 Not Found</h1></body></html>";
-    const size_t totalLength = strlen(body) + 100; // nahradit delkou headers
-    char* response = malloc(totalLength);
-    snprintf(response, totalLength,
+    int written = snprintf(buff, buffSize,
         "HTTP/1.1 404 Not Found\r\n"
-        "Content-Length: %lu\r\n"
+        "Content-Length: %zu\r\n"
         "Content-Type: text/html\r\n"
         "Connection: close\r\n"
         "\r\n%s", strlen(body), body);
-    return response;
+
+    return (written >= 0 && (size_t)written < buffSize) ? 0 : -1;
 }
+
+
 
 
