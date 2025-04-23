@@ -13,24 +13,24 @@ void launch(struct Server *server) {
 
     while (1) {
         char request[1000] = {0};
+        char response[5000] = {0};
         const char* rootDir = "../testWeb/";
 
         printf("Waiting for connection...\n");
-        int clientHandle = getClientHandle(server);
+        int clientHandle = get_client_handle(server);
         if (clientHandle <= 0) {
             continue;
         }
 
-        if (getClientRequest(clientHandle, request, sizeof(request) - 1) != 0) {
+        if (get_client_request(clientHandle, request, sizeof(request) - 1) != 0) {
             continue;
         }
 
-        char response[5000] = {0};
-
-        if (buildResponse(request, rootDir, response, sizeof(response)) < 0) {
-            printf("buffer overflow\n");
+        if (build_response(request, rootDir, response, sizeof(response)) < 0) {
+            printf("Buffer overflow\n");
             continue;
         }
+
         send(clientHandle, response, strlen(response), 0);
 
         printf("\nResponse sent, closing connection.\n");

@@ -10,9 +10,9 @@
 #include <unistd.h>
 
 
-int getClientHandle(struct Server *server) {
+int get_client_handle(struct Server *server) {
     socklen_t address_length = sizeof(server->address);
-    int clientSocket = accept(server->socket, (struct sockaddr *)&server->address, &address_length);
+    const int clientSocket = accept(server->socket, (struct sockaddr *)&server->address, &address_length);
 
     if (clientSocket < 0) {
         perror("Failed to accept a new connection");
@@ -23,8 +23,8 @@ int getClientHandle(struct Server *server) {
     return clientSocket;
 }
 
-int getClientRequest(const int clientHandle, char* buff, const size_t buffSize) {
-    ssize_t bytesRead = read(clientHandle, buff, buffSize);
+int get_client_request(const int clientHandle, char* buff, const size_t buffSize) {
+    const ssize_t bytesRead = read(clientHandle, buff, buffSize);
 
     if (bytesRead < 0) {
         perror("Failed to read request");
@@ -40,7 +40,7 @@ int getClientRequest(const int clientHandle, char* buff, const size_t buffSize) 
     return 0;
 }
 
-int getRequestedFile(const char* request, char* buff, size_t buffSize) {
+int get_requested_file(const char* request, char* buff, const size_t buffSize) {
     char method[8], path[256];
 
     if (sscanf(request, "%7s %255s", method, path) != 2) {
@@ -62,10 +62,10 @@ int getRequestedFile(const char* request, char* buff, size_t buffSize) {
     return 0;
 }
 
-int getFilePath(const char* request, const char* currentWorkingDir, char* buff, size_t buffSize) {
+int get_file_path(const char* request, const char* currentWorkingDir, char* buff, const size_t buffSize) {
     char reqFile[1024] = {0};
 
-    if (getRequestedFile(request, reqFile, sizeof(reqFile)) != 0) {
+    if (get_requested_file(request, reqFile, sizeof(reqFile)) != 0) {
         return -1;
     }
 
@@ -77,16 +77,16 @@ int getFilePath(const char* request, const char* currentWorkingDir, char* buff, 
     return 0;
 }
 
-int getHTMLContent(const char* request, const char* rootDir, char* buff, size_t buffSize) {
+int get_HTML_content(const char* request, const char* rootDir, char* buff, const size_t buffSize) {
     char path[1024] = {0};
-    if (getFilePath(request, rootDir, path, sizeof(path)) != 0) {
+    if (get_file_path(request, rootDir, path, sizeof(path)) != 0) {
         return 1;
     }
 
     FILE *file = fopen(path, "r");
     if (file == NULL) {
         printf("File not found: %s\n", path);
-        return 1;
+        return -1;
     }
 
     fseek(file, 0, SEEK_END);
@@ -105,32 +105,28 @@ int getHTMLContent(const char* request, const char* rootDir, char* buff, size_t 
     return 0;
 }
 
-int buildResponse(const char* reqeust, const char* rootDir, char* buff, size_t buffSize) {
+int build_response(const char* reqeust, const char* rootDir, char* buff, const size_t buffSize) {
     char htmlbuffer[4000];
-    getHTMLContent(reqeust, rootDir, htmlbuffer, sizeof(htmlbuffer));
-    size_t contentLength = strlen(htmlbuffer);
-    int written = snprintf(buff, buffSize,
-        "HTTP/1.1 200 OK\r\n"
-        "Content-Length: %zu\r\n"
-        "Content-Type: text/html\r\n"
-        "Connection: close\r\n"
-        "\r\n%s", contentLength, htmlbuffer);
+    int written=0;
+    if (get_HTML_content(reqeust, rootDir, htmlbuffer, sizeof(htmlbuffer)) < 0) {
+        const char* body = "<html><body><h1>404 Not Found</h1></body></html>";
+        written = snprintf(buff, buffSize,
+            "HTTP/1.1 404 Not Found\r\n"
+            "Content-Length: %zu\r\n"
+            "Content-Type: text/html\r\n"
+            "Connection: close\r\n"
+            "\r\n%s", strlen(body), body);
+
+        return (written >= 0 && (size_t)written < buffSize) ? 0 : -1;
+    } else {
+        const size_t contentLength = strlen(htmlbuffer);
+        written = snprintf(buff, buffSize,
+            "HTTP/1.1 200 OK\r\n"
+            "Content-Length: %zu\r\n"
+            "Content-Type: text/html\r\n"
+            "Connection: close\r\n"
+            "\r\n%s", contentLength, htmlbuffer);
+    }
 
     return (written >= 0 && (size_t)written < buffSize) ? 0 : -1;
 }
-
-int buildNotFoundResponse(char* buff, size_t buffSize) {
-    const char* body = "<html><body><h1>404 Not Found</h1></body></html>";
-    int written = snprintf(buff, buffSize,
-        "HTTP/1.1 404 Not Found\r\n"
-        "Content-Length: %zu\r\n"
-        "Content-Type: text/html\r\n"
-        "Connection: close\r\n"
-        "\r\n%s", strlen(body), body);
-
-    return (written >= 0 && (size_t)written < buffSize) ? 0 : -1;
-}
-
-
-
-

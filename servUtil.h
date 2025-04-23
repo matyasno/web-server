@@ -10,12 +10,11 @@
 #include "Server.h"
 
 // net shit
-int getClientHandle(struct Server *server);
-int getClientRequest(int clientHandle, char* buff, size_t buffSize);
+int get_client_handle(struct Server *server);
+int get_client_request(int clientHandle, char* buff, size_t buffSize);
 
 // parsing requests/building responses
-int getHTMLContent(const char* request, const char* rootDir, char* buff, size_t buffSize);
-int getRequestedFile(const char* request, char* buff, size_t buffSize);
-int getFilePath(const char* request, const char* currentWorkingDir, char* buff, size_t buffSize);
-int buildResponse(const char* reqeust, const char* rootDir, char* buff, size_t buffSize);
-int buildNotFoundResponse(char* buff, size_t buffSize);
+int get_HTML_content(const char* request, const char* rootDir, char* buff, const size_t buffSize);
+int get_requested_file(const char* request, char* buff, const size_t buffSize);
+int get_file_path(const char* request, const char* currentWorkingDir, char* buff, const size_t buffSize);
+int build_response(const char* reqeust, const char* rootDir, char* buff, const size_t buffSize);
