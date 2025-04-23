@@ -24,7 +24,7 @@ int get_client_handle(struct Server *server) {
 
     if (clientSocket < 0) {
         perror("Failed to accept a new connection");
-        return OK;
+        return ERROR_GENERIC;
     }
 
     printf("Client connected successfully\n");
@@ -100,32 +100,40 @@ int get_file_path(const char* request, const char* currentWorkingDir, char* buff
 
     return OK;
 }
-int get_file_content(const char* request, const char* rootDir, char* buff, const size_t buffSize) {
+char* get_file_content(const char* request, const char* rootDir) {
     char path[PATH_SIZE];
     if (get_file_path(request, rootDir, path, sizeof(path)) != 0) {
-        return 1;
+        return NULL;
     }
 
     FILE *file = fopen(path, "rb");
     if (file == NULL) {
         printf("File not found: %s\n", path);
-        return ERROR_NOT_FOUND;
+        return NULL;
     }
 
     fseek(file, 0, SEEK_END);
     long size = ftell(file);
     rewind(file);
 
-    if (size <= 0 || size >= (long)buffSize) {
+    char* content = malloc(size + 1);
+    if (content == NULL) {
+        perror("Failed to allocate memory");
         fclose(file);
-        return ERROR_OVERFLOW;
+        return NULL;
     }
 
-    size_t bytesRead = fread(buff, 1, size, file);
-    buff[bytesRead] = '\0';
-    fclose(file);
+    size_t bytesRead = fread(content, 1, size, file);
 
-    return OK;
+    if (bytesRead != size) {
+        perror("Failed to read file");
+        fclose(file);
+        free(content);
+        return NULL;
+    }
+
+    fclose(file);
+    return content;
 }
 int build_response(const char* request, const char* rootDir, char* buff, const size_t buffSize) {
     int written=0;
@@ -180,9 +188,9 @@ const char* get_mime_type(const char* request, const char* rootDir) {
 }
 
 int handle_get(const char* request, const char* rootDir, char* buff, const size_t buffSize) {
-    char filecontent[CONTENT_SIZE];
+    char* file_content = get_file_content(request, rootDir);
     int written;
-    if (get_file_content(request, rootDir, filecontent, sizeof(filecontent)) < 0) {
+    if (file_content == NULL) {
         const char* body = "<html><body><h1>404 Not Found</h1><a href='index.html'>Go home</a></body></html>";
         written = snprintf(buff, buffSize,
             "HTTP/1.1 404 Not Found\r\n"
@@ -190,17 +198,17 @@ int handle_get(const char* request, const char* rootDir, char* buff, const size_
             "Content-Type: text/html\r\n"
             "Connection: close\r\n"
             "\r\n%s", strlen(body), body);
-
         return (written >= 0 && (size_t)written < buffSize) ? OK : ERROR_OVERFLOW;
     } else {
-        const size_t contentLength = strlen(filecontent);
+        const size_t contentLength = strlen(file_content);
         const char* mime_type = get_mime_type(request, rootDir);
         written = snprintf(buff, buffSize,
             "HTTP/1.1 200 OK\r\n"
             "Content-Length: %zu\r\n"
             "Content-Type: %s\r\n"
             "Connection: close\r\n"
-            "\r\n%s", contentLength, mime_type, filecontent);
+            "\r\n%s", contentLength, mime_type, file_content);
+            free(file_content);
         return (written >= 0 && (size_t)written < buffSize) ? OK : ERROR_OVERFLOW;
     }
     return ERROR_GENERIC;

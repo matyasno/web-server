@@ -7,7 +7,7 @@
     #define SHUT_RDWR SD_BOTH
 #endif
 
-#define CONTENT_SIZE 5000
+#define RESPONSE_SIZE 5000000
 #define REQUEST_SIZE 1000
 
 void launch(struct Server *server) {
@@ -15,7 +15,7 @@ void launch(struct Server *server) {
 
     while (1) {
         char request[REQUEST_SIZE] = {0};
-        char response[CONTENT_SIZE] = {0};
+        char *response = calloc(RESPONSE_SIZE, sizeof(char));
         const char* rootDir = "../testWeb/";
 
         printf("Waiting for connection...\n");
@@ -28,12 +28,13 @@ void launch(struct Server *server) {
             continue;
         }
 
-        if (build_response(request, rootDir, response, sizeof(response)) < 0) {
+        if (build_response(request, rootDir, response, RESPONSE_SIZE) < 0) {
             printf("Buffer overflow\n");
             continue;
         }
 
         send(clientHandle, response, strlen(response), 0);
+        free(response);
 
         printf("\nResponse sent, closing connection.\n");
         shutdown(clientHandle, SHUT_RDWR);
