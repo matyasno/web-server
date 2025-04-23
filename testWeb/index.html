@@ -1,4 +1,27 @@
-<html><body><h1>Hello</h1>
-<a href="test.html">Test</a>
-<a href="test1.html">Test 1</a>
-</body></html>
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <title>Test JavaScriptu</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<h1>Test</h1>
+
+<a href="test.html">Test.html</a>
+<a href="test1.html">Test1.html</a> <br>
+
+<img src="img.jpg" alt="img" class="obrazek" width="500"> <br>
+
+<button onclick="zobrazZpravu()">JavaScript Test</button>
+<p id="vystup"></p>
+
+<script>
+    function zobrazZpravu() {
+        const vystup = document.getElementById("vystup");
+        vystup.innerText = "JavaScript funguje";
+        vystup.classList.add("aktivni");
+    }
+</script>
+</body>
+</html>

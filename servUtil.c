@@ -9,7 +9,6 @@
 #include <string.h>
 #include <unistd.h>
 
-
 int get_client_handle(struct Server *server) {
     socklen_t address_length = sizeof(server->address);
     const int clientSocket = accept(server->socket, (struct sockaddr *)&server->address, &address_length);
@@ -51,6 +50,11 @@ int get_requested_file(const char* request, char* buff, const size_t buffSize) {
     const char* requested = (path[0] == '/') ? path + 1 : path;
     if (strlen(requested) == 0) {
         requested = "index.html";
+    }
+
+    if (strstr(requested, "..")) {
+        fprintf(stderr, "Blocked suspicious path: %s\n", requested);
+        return -1;
     }
 
     size_t neededSize = strlen(requested) + 1;
@@ -120,13 +124,29 @@ int build_response(const char* request, const char* rootDir, char* buff, const s
         return (written >= 0 && (size_t)written < buffSize) ? 0 : -1;
     } else {
         const size_t contentLength = strlen(htmlbuffer);
+        const char* mime_type = get_mime_type(request, rootDir);
         written = snprintf(buff, buffSize,
             "HTTP/1.1 200 OK\r\n"
             "Content-Length: %zu\r\n"
-            "Content-Type: text/html\r\n"
+            "Content-Type: %s\r\n"
             "Connection: close\r\n"
-            "\r\n%s", contentLength, htmlbuffer);
+            "\r\n%s", contentLength, mime_type, htmlbuffer);
     }
 
     return (written >= 0 && (size_t)written < buffSize) ? 0 : -1;
+}
+
+const char* get_mime_type(const char* request, const char* rootDir) {
+    char path[1024] = {0};
+    get_file_path(request, rootDir, path, sizeof(path));
+    const char* extension = strrchr(path, '.');
+        if (!extension) return "application/octet-stream";
+        if (strcmp(extension, ".html") == 0) return "text/html";
+        if (strcmp(extension, ".css") == 0) return "text/css";
+        if (strcmp(extension, ".js") == 0) return "application/javascript";
+        if (strcmp(extension, ".png") == 0) return "image/png";
+        if (strcmp(extension, ".gif") == 0) return "image/gif";
+        if (strcmp(extension, ".jpg") == 0) return "image/jpeg";
+        if (strcmp(extension, ".jpeg") == 0) return "image/jpeg";
+    return "application/octet-stream";
 }
