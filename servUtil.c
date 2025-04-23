@@ -21,7 +21,6 @@ int get_client_handle(struct Server *server) {
     printf("Client connected successfully\n");
     return clientSocket;
 }
-
 int get_client_request(const int clientHandle, char* buff, const size_t buffSize) {
     const ssize_t bytesRead = read(clientHandle, buff, buffSize);
 
@@ -65,7 +64,6 @@ int get_requested_file(const char* request, char* buff, const size_t buffSize) {
     strcpy(buff, requested);
     return 0;
 }
-
 int get_request_method(const char* request, char* buff, const size_t buffSize) {
     char method[8], path[256];
 
@@ -79,7 +77,6 @@ int get_request_method(const char* request, char* buff, const size_t buffSize) {
     strcpy(buff, method);
     return 0;
 }
-
 int get_file_path(const char* request, const char* currentWorkingDir, char* buff, const size_t buffSize) {
     char reqFile[1024] = {0};
 
@@ -94,7 +91,6 @@ int get_file_path(const char* request, const char* currentWorkingDir, char* buff
 
     return 0;
 }
-
 int get_file_content(const char* request, const char* rootDir, char* buff, const size_t buffSize) {
     char path[1024] = {0};
     if (get_file_path(request, rootDir, path, sizeof(path)) != 0) {
@@ -122,7 +118,6 @@ int get_file_content(const char* request, const char* rootDir, char* buff, const
 
     return 0;
 }
-
 int build_response(const char* request, const char* rootDir, char* buff, const size_t buffSize) {
     int written=0;
     char method[8];
@@ -151,6 +146,20 @@ int build_response(const char* request, const char* rootDir, char* buff, const s
     }
 
     return 1;
+}
+const char* get_mime_type(const char* request, const char* rootDir) {
+    char path[1024] = {0};
+    get_file_path(request, rootDir, path, sizeof(path));
+    const char* extension = strrchr(path, '.');
+    if (!extension) return "application/octet-stream";
+    if (strcmp(extension, ".html") == 0) return "text/html";
+    if (strcmp(extension, ".css") == 0) return "text/css";
+    if (strcmp(extension, ".js") == 0) return "application/javascript";
+    if (strcmp(extension, ".png") == 0) return "image/png";
+    if (strcmp(extension, ".gif") == 0) return "image/gif";
+    if (strcmp(extension, ".jpg") == 0) return "image/jpeg";
+    if (strcmp(extension, ".jpeg") == 0) return "image/jpeg";
+    return "application/octet-stream";
 }
 
 int handle_get(const char* request, const char* rootDir, char* buff, const size_t buffSize) {
@@ -202,20 +211,4 @@ int handle_connect(const char* request, const char* rootDir, char* buff, const s
 }
 int handle_trace(const char* request, const char* rootDir, char* buff, const size_t buffSize) {
     return 1;
-}
-
-
-const char* get_mime_type(const char* request, const char* rootDir) {
-    char path[1024] = {0};
-    get_file_path(request, rootDir, path, sizeof(path));
-    const char* extension = strrchr(path, '.');
-        if (!extension) return "application/octet-stream";
-        if (strcmp(extension, ".html") == 0) return "text/html";
-        if (strcmp(extension, ".css") == 0) return "text/css";
-        if (strcmp(extension, ".js") == 0) return "application/javascript";
-        if (strcmp(extension, ".png") == 0) return "image/png";
-        if (strcmp(extension, ".gif") == 0) return "image/gif";
-        if (strcmp(extension, ".jpg") == 0) return "image/jpeg";
-        if (strcmp(extension, ".jpeg") == 0) return "image/jpeg";
-    return "application/octet-stream";
 }
