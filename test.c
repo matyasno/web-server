@@ -34,9 +34,10 @@ void launch(struct Server *server) {
         }
 
         send(clientHandle, response, strlen(response), 0);
+        printf("\nResponse sent\n, closing connection.\n");
+
         free(response);
 
-        printf("\nResponse sent, closing connection.\n");
         shutdown(clientHandle, SHUT_RDWR);
         close(clientHandle);
     }
