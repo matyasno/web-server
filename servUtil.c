@@ -14,9 +14,28 @@
 #define ERROR_NOT_FOUND -2
 #define ERROR_OVERFLOW -3
 
-const size_t CONTENT_SIZE = 5000;
-const size_t PATH_SIZE = 1024;
-const size_t METHOD_SIZE = 8;
+#define METHOD_SIZE 8
+#define CONTENT_SIZE 5000
+#define PATH_SIZE 1024
+
+typedef int handler_address(const char *, const char *, char *, const size_t);
+
+typedef struct{
+    char method[METHOD_SIZE];
+    handler_address *handler;
+}html_handlers;
+
+html_handlers handlers[] = {
+    {"HEAD",handle_head},
+    {"GET",handle_get},
+    {"POST",handle_post},
+    {"DELETE",handle_delete},
+    {"PATCH",handle_patch},
+    {"PUT",handle_put},
+    {"TRACE",handle_trace},
+    {"CONNECT",handle_connect},
+    {"OPTIONS",handle_options}
+};
 
 int get_client_handle(struct Server *server) {
     socklen_t address_length = sizeof(server->address);
@@ -116,7 +135,7 @@ char* get_file_content(const char* request, const char* rootDir) {
     long size = ftell(file);
     rewind(file);
 
-    char* content = malloc(size + 1);
+    char* content = malloc(size+1);
     if (content == NULL) {
         perror("Failed to allocate memory");
         fclose(file);
@@ -132,44 +151,22 @@ char* get_file_content(const char* request, const char* rootDir) {
         return NULL;
     }
 
+    content[size] = '\0';
+
     fclose(file);
     return content;
 }
 int build_response(const char* request, const char* rootDir, char* buff, const size_t buffSize) {
-    int written=0;
     char method[METHOD_SIZE];
     get_request_method(request, method, sizeof(method));
-    if (strcmp(method,"GET")==0) {
-        handle_get(request, rootDir, buff, buffSize);
-        return OK;
-    } else if (strcmp(method,"HEAD")==0) {
-        handle_head(request, rootDir, buff, buffSize);
-        return OK;
-    } else if (strcmp(method,"POST")==0) {
-        handle_post(request, rootDir, buff, buffSize);
-        return OK;
-    } else if (strcmp(method,"PUT")==0) {
-        handle_put(request, rootDir, buff, buffSize);
-        return OK;
-    } else if (strcmp(method,"DELETE")==0) {
-        handle_delete(request, rootDir, buff, buffSize);
-        return OK;
-    } else if (strcmp(method,"OPTIONS")==0) {
-        handle_options(request, rootDir, buff, buffSize);
-        return OK;
-    } else if (strcmp(method,"PATCH")==0) {
-        handle_patch(request, rootDir, buff, buffSize);
-        return OK;
-    } else if (strcmp(method,"CONNECT")==0) {
-        handle_connect(request, rootDir, buff, buffSize);
-        return OK;
-    } else if (strcmp(method,"TRACE")==0) {
-        handle_trace(request, rootDir, buff, buffSize);
-        return OK;
-    } else {
-        fprintf(stderr, "Unknown method: %s\n", method);
+
+    for (size_t i = 0; i < sizeof(handlers) / sizeof(handlers[0]); ++i) {
+        if (strcmp(method, handlers[i].method) == 0) {
+            return handlers[i].handler(request, rootDir, buff, buffSize);
+        }
     }
 
+    fprintf(stderr, "Unknown method: %s\n", method);
     return ERROR_GENERIC;
 }
 const char* get_mime_type(const char* request, const char* rootDir) {
@@ -189,27 +186,42 @@ const char* get_mime_type(const char* request, const char* rootDir) {
 
 int handle_get(const char* request, const char* rootDir, char* buff, const size_t buffSize) {
     char* file_content = get_file_content(request, rootDir);
-    int written;
+    int header_length;
     if (file_content == NULL) {
         const char* body = "<html><body><h1>404 Not Found</h1><a href='index.html'>Go home</a></body></html>";
-        written = snprintf(buff, buffSize,
+        header_length = snprintf(buff, buffSize,
             "HTTP/1.1 404 Not Found\r\n"
             "Content-Length: %zu\r\n"
             "Content-Type: text/html\r\n"
             "Connection: close\r\n"
             "\r\n%s", strlen(body), body);
-        return (written >= 0 && (size_t)written < buffSize) ? OK : ERROR_OVERFLOW;
+        return (header_length >= 0 && (size_t)header_length  < buffSize) ? OK : ERROR_OVERFLOW;
     } else {
-        const size_t contentLength = strlen(file_content);
+        size_t contentLength = strlen(file_content);
         const char* mime_type = get_mime_type(request, rootDir);
-        written = snprintf(buff, buffSize,
+
+        header_length = snprintf(buff, buffSize,
             "HTTP/1.1 200 OK\r\n"
             "Content-Length: %zu\r\n"
             "Content-Type: %s\r\n"
             "Connection: close\r\n"
-            "\r\n%s", contentLength, mime_type, file_content);
+            "\r\n", contentLength, mime_type);
+
+        if (header_length < 0 || (size_t)header_length >= buffSize) {
             free(file_content);
-        return (written >= 0 && (size_t)written < buffSize) ? OK : ERROR_OVERFLOW;
+            return ERROR_OVERFLOW;
+        }
+
+        if ((size_t)header_length + contentLength >= buffSize) {
+            free(file_content);
+            return ERROR_OVERFLOW;
+        }
+
+        memcpy(buff + header_length, file_content, contentLength);
+
+        free(file_content);
+        return OK;
+
     }
     return ERROR_GENERIC;
 }
