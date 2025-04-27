@@ -141,6 +141,7 @@ char* get_file_content(const char* request, const char* rootDir, size_t* outSize
     fseek(file, 0, SEEK_END);
     long size = ftell(file);
     rewind(file);
+    *outSize = size;
 
     char* content = malloc(size+1);
     if (content == NULL) {
