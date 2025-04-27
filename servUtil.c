@@ -66,6 +66,13 @@ int get_client_request(const int clientHandle, char* buff, const size_t buffSize
     return OK;
 }
 
+int send_client_response(const int clientHandle, const char* buff, const size_t buffSize, const int flags) {
+    if (send(clientHandle, buff, buffSize, flags) < 0) {
+        return ERROR_GENERIC;
+    }
+    return OK;
+}
+
 int get_requested_file(const char* request, char* buff, const size_t buffSize) {
     char method[METHOD_SIZE], path[PATH_SIZE];
 
@@ -119,7 +126,7 @@ int get_file_path(const char* request, const char* currentWorkingDir, char* buff
 
     return OK;
 }
-char* get_file_content(const char* request, const char* rootDir) {
+char* get_file_content(const char* request, const char* rootDir, size_t* outSize) {
     char path[PATH_SIZE];
     if (get_file_path(request, rootDir, path, sizeof(path)) != 0) {
         return NULL;
@@ -185,8 +192,8 @@ const char* get_mime_type(const char* request, const char* rootDir) {
 }
 
 int handle_get(const char* request, const char* rootDir, char* buff, const size_t buffSize) {
-    char* file_content = get_file_content(request, rootDir);
-    int header_length;
+    size_t header_length, content_length;
+    char* file_content = get_file_content(request, rootDir, &content_length);
     if (file_content == NULL) {
         const char* body = "<html><body><h1>404 Not Found</h1><a href='index.html'>Go home</a></body></html>";
         header_length = snprintf(buff, buffSize,
@@ -195,7 +202,7 @@ int handle_get(const char* request, const char* rootDir, char* buff, const size_
             "Content-Type: text/html\r\n"
             "Connection: close\r\n"
             "\r\n%s", strlen(body), body);
-        return (header_length >= 0 && (size_t)header_length  < buffSize) ? OK : ERROR_OVERFLOW;
+        return (header_length < buffSize) ? OK : ERROR_OVERFLOW;
     } else {
         size_t contentLength = strlen(file_content);
         const char* mime_type = get_mime_type(request, rootDir);
@@ -207,12 +214,12 @@ int handle_get(const char* request, const char* rootDir, char* buff, const size_
             "Connection: close\r\n"
             "\r\n", contentLength, mime_type);
 
-        if (header_length < 0 || (size_t)header_length >= buffSize) {
+        if (header_length >= buffSize) {
             free(file_content);
             return ERROR_OVERFLOW;
         }
 
-        if ((size_t)header_length + contentLength >= buffSize) {
+        if (header_length + contentLength >= buffSize) {
             free(file_content);
             return ERROR_OVERFLOW;
         }
