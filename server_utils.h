@@ -7,7 +7,7 @@
 
 #endif //SERVUTIL_H
 
-#include "Server.h"
+#include "server.h"
 
 // net shit
 int get_client_handle(struct Server *server);
