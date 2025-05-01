@@ -29,11 +29,7 @@ void launch(struct Server *server) {
             continue;
         }
 
-        if (build_response(request, rootDir, response, RESPONSE_SIZE) < 0) {
-            continue;
-        }
-
-        if (send_client_response(clientHandle, response, strlen(response), 0) < 0) {
+        if (handle_response(clientHandle, request, rootDir, response, RESPONSE_SIZE) < 0) {
             continue;
         }
 

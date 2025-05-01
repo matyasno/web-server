@@ -19,11 +19,11 @@ char* get_file_content(const char* request, const char* rootDir, size_t* outSize
 int get_requested_file(const char* request, char* buff, const size_t buffSize);
 int get_file_path(const char* request, const char* currentWorkingDir, char* buff, const size_t buffSize);
 int get_request_method(const char* request, char* buff, const size_t buffSize);
-int build_response(const char* request, const char* rootDir, char* buff, const size_t buffSize);
+int handle_response(const int client_fd,const char* request, const char* rootDir, char* buff, const size_t buffSize);
 const char* get_mime_type(const char* request, const char* rootDir);
 
 // method handling
-int handle_get(const char* request, const char* rootDir, char* buff, const size_t buffSize);
+int handle_get(const int client_fd, const char* request, const char* rootDir);
 int handle_head(const char* request, const char* rootDir, char* buff, const size_t buffSize);
 int handle_post(const char* request, const char* rootDir, char* buff, const size_t buffSize);
 int handle_put(const char* request, const char* rootDir, char* buff, const size_t buffSize);

@@ -15,10 +15,10 @@
 #define ERROR_OVERFLOW (-3)
 
 #define METHOD_SIZE 8
-#define CONTENT_SIZE 5000
 #define PATH_SIZE 1024
+#define HEADER_SIZE 1024
 
-typedef int handler_address(const char *, const char *, char *, const size_t);
+typedef int handler_address(const int, const char *, const char *);
 
 typedef struct{
     char method[METHOD_SIZE];
@@ -26,15 +26,7 @@ typedef struct{
 }html_handlers;
 
 html_handlers handlers[] = {
-    {"HEAD",handle_head},
-    {"GET",handle_get},
-    {"POST",handle_post},
-    {"DELETE",handle_delete},
-    {"PATCH",handle_patch},
-    {"PUT",handle_put},
-    {"TRACE",handle_trace},
-    {"CONNECT",handle_connect},
-    {"OPTIONS",handle_options}
+    {"GET",handle_get}
 };
 
 int get_client_handle(struct Server *server) {
@@ -170,19 +162,7 @@ char* get_file_content(const char* request, const char* rootDir, size_t* outSize
     fclose(file);
     return content;
 }
-int build_response(const char* request, const char* rootDir, char* buff, const size_t buffSize) {
-    char method[METHOD_SIZE];
-    get_request_method(request, method, sizeof(method));
 
-    for (size_t i = 0; i < sizeof(handlers) / sizeof(handlers[0]); ++i) {
-        if (strcmp(method, handlers[i].method) == 0) {
-            return handlers[i].handler(request, rootDir, buff, buffSize);
-        }
-    }
-
-    fprintf(stderr, "Unknown method: %s\n", method);
-    return ERROR_GENERIC;
-}
 const char* get_mime_type(const char* request, const char* rootDir) {
     char path[PATH_SIZE];
     get_file_path(request, rootDir, path, sizeof(path));
@@ -197,41 +177,65 @@ const char* get_mime_type(const char* request, const char* rootDir) {
     if (strcmp(extension, ".jpeg") == 0) return "image/jpeg";
     return "application/octet-stream";
 }
+int handle_response(const int client_fd, const char* request, const char* rootDir, char* buff, const size_t buffSize) {
+    char method[METHOD_SIZE];
+    get_request_method(request, method, sizeof(method));
 
-int handle_get(const char* request, const char* rootDir, char* buff, const size_t buffSize) {
+    for (size_t i = 0; i < sizeof(handlers) / sizeof(handlers[0]); ++i) {
+        if (strcmp(method, handlers[i].method) == 0) {
+            return handlers[i].handler(client_fd, request, rootDir);
+        }
+    }
+
+    fprintf(stderr, "Unknown method: %s\n", method);
+    return ERROR_GENERIC;
+}
+int handle_get(const int client_fd, const char* request, const char* rootDir) {
     size_t header_length, content_length;
     char* file_content = get_file_content(request, rootDir, &content_length);
+    char header[HEADER_SIZE];
     if (file_content == NULL) {
         const char* body = "<html><body><h1>404 Not Found</h1><a href='index.html'>Go home</a></body></html>";
-        header_length = snprintf(buff, buffSize,
+        header_length = snprintf(header, sizeof(header),
             "HTTP/1.1 404 Not Found\r\n"
             "Content-Length: %zu\r\n"
             "Content-Type: text/html\r\n"
             "Connection: close\r\n"
             "\r\n%s", strlen(body), body);
-        return (header_length < buffSize) ? OK : ERROR_OVERFLOW;
+
+        if (send_client_response(client_fd, header, strlen(header), 0) < 0) {
+            return OK;
+        }
+
+        return OK;
     } else {
         size_t contentLength = strlen(file_content);
         const char* mime_type = get_mime_type(request, rootDir);
 
-        header_length = snprintf(buff, buffSize,
+        header_length = snprintf(header, sizeof(header),
             "HTTP/1.1 200 OK\r\n"
             "Content-Length: %zu\r\n"
             "Content-Type: %s\r\n"
             "Connection: close\r\n"
             "\r\n", contentLength, mime_type);
 
-        if (header_length >= buffSize) {
+        if (header_length >= sizeof(header)) {
             free(file_content);
             return ERROR_OVERFLOW;
         }
 
-        if (header_length + contentLength >= buffSize) {
+        if (header_length + contentLength >= sizeof(header)) {
             free(file_content);
             return ERROR_OVERFLOW;
         }
 
-        memcpy(buff + header_length, file_content, contentLength);
+        if (send_client_response(client_fd, header, strlen(header), 0) < 0) {
+            return ERROR_GENERIC;
+        }
+
+        if (send_client_response(client_fd, file_content, strlen(file_content), 0) < 0) {
+            return ERROR_GENERIC;
+        }
 
         free(file_content);
         return OK;
