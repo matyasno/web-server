@@ -63,14 +63,12 @@ int get_client_request(const int client_fd, char* buff, const size_t buff_size) 
     buff[bytesRead] = '\0';
     return OK;
 }
-
 int send_client_response(const int client_fd, const char* buff, const size_t buff_size, const int flags) {
     if (send(client_fd, buff, buff_size, flags) < 0) {
         return ERROR_GENERIC;
     }
     return OK;
 }
-
 int get_requested_file(const char* request, char* buff, const size_t buff_size) {
     char method[METHOD_SIZE], path[PATH_SIZE];
 
@@ -162,7 +160,6 @@ char* get_file_content(const char* request, const char* root_dir, size_t* outSiz
     fclose(file);
     return content;
 }
-
 const char* get_mime_type(const char* request, const char* rootDir) {
     char path[PATH_SIZE];
     get_file_path(request, rootDir, path, sizeof(path));
@@ -258,14 +255,13 @@ int handle_get(const int client_fd, const char* request, const char* root_dir) {
 
     if (!file_content) {
         return send_404_response(client_fd);
-    } else {
-        if (send_file_response(client_fd, request, root_dir, file_content, content_length) < 0) {
-            free(file_content);
-            return ERROR_GENERIC;
-        }
-        free(file_content);
-        return OK;
     }
+    if (send_file_response(client_fd, request, root_dir, file_content, content_length) < 0) {
+        free(file_content);
+        return ERROR_GENERIC;
+    }
+    free(file_content);
+    return OK;
 }
 int handle_head(const char* request, const char* root_dir) {
     return ERROR_GENERIC;
