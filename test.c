@@ -54,8 +54,6 @@ int main(int args, char **argv) {
         exit(1);
     }
 #endif
-
-
     struct Server server = server_constructor(AF_INET, SOCK_STREAM, 0, INADDR_ANY, 8080, 10, launch);
     server.launch(&server);
     return 0;

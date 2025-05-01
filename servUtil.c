@@ -41,12 +41,18 @@ int get_client_handle(struct Server *server) {
     socklen_t address_length = sizeof(server->address);
     const int clientSocket = accept(server->socket, (struct sockaddr *)&server->address, &address_length);
 
+
     if (clientSocket < 0) {
         perror("Failed to accept a new connection");
         return ERROR_GENERIC;
     }
 
-    printf("Client connected successfully\n");
+    char client_ip[INET_ADDRSTRLEN];
+    inet_ntop(AF_INET, &(server->address.sin_addr), client_ip, INET_ADDRSTRLEN);
+    const int client_port = ntohs(server->address.sin_port);
+
+    printf("Client connected: %s:%d\n", client_ip, client_port);
+
     return clientSocket;
 }
 int get_client_request(const int clientHandle, char* buff, const size_t buffSize) {
