@@ -10,9 +10,9 @@
 #include <unistd.h>
 
 #define OK 0
-#define ERROR_GENERIC -1
-#define ERROR_NOT_FOUND -2
-#define ERROR_OVERFLOW -3
+#define ERROR_GENERIC (-1)
+#define ERROR_NOT_FOUND (-2)
+#define ERROR_OVERFLOW (-3)
 
 #define METHOD_SIZE 8
 #define CONTENT_SIZE 5000
@@ -116,7 +116,7 @@ int get_file_path(const char* request, const char* currentWorkingDir, char* buff
     char reqFile[PATH_SIZE];
 
     if (get_requested_file(request, reqFile, sizeof(reqFile)) != 0) {
-        return -1;
+        return ERROR_GENERIC;
     }
 
     if (snprintf(buff, buffSize, "%s%s", currentWorkingDir, reqFile) >= (int)buffSize) {
@@ -159,7 +159,7 @@ char* get_file_content(const char* request, const char* rootDir, size_t* outSize
         return NULL;
     }
 
-    content[size] = '\0';
+    content[size] = '\0'; //nemuzu pouzit u bin souboru
 
     fclose(file);
     return content;
@@ -231,7 +231,6 @@ int handle_get(const char* request, const char* rootDir, char* buff, const size_
         return OK;
 
     }
-    return ERROR_GENERIC;
 }
 int handle_head(const char* request, const char* rootDir, char* buff, const size_t buffSize) {
     return ERROR_GENERIC;
