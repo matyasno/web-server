@@ -125,13 +125,13 @@ int get_file_path(const char* request, const char* currentWorkingDir, char* buff
 char* get_file_content(const char* request, const char* root_dir, size_t* outSize) {
     char path[PATH_SIZE];
     if (get_file_path(request, root_dir, path, sizeof(path)) != 0) {
-        return nullptr;
+        return NULL;
     }
 
     FILE *file = fopen(path, "rb");
     if (file == NULL) {
         printf("File not found: %s\n", path);
-        return nullptr;
+        return NULL;
     }
 
     fseek(file, 0, SEEK_END);
@@ -143,7 +143,7 @@ char* get_file_content(const char* request, const char* root_dir, size_t* outSiz
     if (content == NULL) {
         perror("Failed to allocate memory");
         fclose(file);
-        return nullptr;
+        return NULL;
     }
 
     const size_t bytesRead = fread(content, 1, size, file);
@@ -152,7 +152,7 @@ char* get_file_content(const char* request, const char* root_dir, size_t* outSiz
         perror("Failed to read file");
         fclose(file);
         free(content);
-        return nullptr;
+        return NULL;
     }
 
     content[size] = '\0'; //nemuzu pouzit u bin souboru
