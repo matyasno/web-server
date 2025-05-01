@@ -31,10 +31,10 @@ html_handlers handlers[] = {
 
 int get_client_handle(struct Server *server) {
     socklen_t address_length = sizeof(server->address);
-    const int clientSocket = accept(server->socket, (struct sockaddr *)&server->address, &address_length);
+    const int client_fd = accept(server->socket, (struct sockaddr *)&server->address, &address_length);
 
 
-    if (clientSocket < 0) {
+    if (client_fd < 0) {
         perror("Failed to accept a new connection");
         return ERROR_GENERIC;
     }
@@ -45,18 +45,18 @@ int get_client_handle(struct Server *server) {
 
     printf("Client connected: %s:%d\n", client_ip, client_port);
 
-    return clientSocket;
+    return client_fd;
 }
-int get_client_request(const int clientHandle, char* buff, const size_t buffSize) {
-    const ssize_t bytesRead = read(clientHandle, buff, buffSize);
+int get_client_request(const int client_fd, char* buff, const size_t buff_size) {
+    const ssize_t bytesRead = read(client_fd, buff, buff_size);
 
     if (bytesRead < 0) {
         perror("Failed to read request");
-        close(clientHandle);
+        close(client_fd);
         return ERROR_GENERIC;
     } else if (bytesRead == 0) {
         printf("Client closed the connection before sending data.\n");
-        close(clientHandle);
+        close(client_fd);
         return OK;
     }
 
@@ -64,14 +64,14 @@ int get_client_request(const int clientHandle, char* buff, const size_t buffSize
     return OK;
 }
 
-int send_client_response(const int clientHandle, const char* buff, const size_t buffSize, const int flags) {
-    if (send(clientHandle, buff, buffSize, flags) < 0) {
+int send_client_response(const int client_fd, const char* buff, const size_t buff_size, const int flags) {
+    if (send(client_fd, buff, buff_size, flags) < 0) {
         return ERROR_GENERIC;
     }
     return OK;
 }
 
-int get_requested_file(const char* request, char* buff, const size_t buffSize) {
+int get_requested_file(const char* request, char* buff, const size_t buff_size) {
     char method[METHOD_SIZE], path[PATH_SIZE];
 
     if (sscanf(request, "%7s %255s", method, path) != 2) {
@@ -90,7 +90,7 @@ int get_requested_file(const char* request, char* buff, const size_t buffSize) {
     }
 
     size_t neededSize = strlen(requested) + 1;
-    if (neededSize > buffSize) {
+    if (neededSize > buff_size) {
         return ERROR_OVERFLOW;
     }
 
@@ -124,9 +124,9 @@ int get_file_path(const char* request, const char* currentWorkingDir, char* buff
 
     return OK;
 }
-char* get_file_content(const char* request, const char* rootDir, size_t* outSize) {
+char* get_file_content(const char* request, const char* root_dir, size_t* outSize) {
     char path[PATH_SIZE];
-    if (get_file_path(request, rootDir, path, sizeof(path)) != 0) {
+    if (get_file_path(request, root_dir, path, sizeof(path)) != 0) {
         return NULL;
     }
 
@@ -177,92 +177,105 @@ const char* get_mime_type(const char* request, const char* rootDir) {
     if (strcmp(extension, ".jpeg") == 0) return "image/jpeg";
     return "application/octet-stream";
 }
-int handle_response(const int client_fd, const char* request, const char* rootDir, char* buff, const size_t buffSize) {
+int handle_response(const int client_fd, const char* request, const char* root_dir) {
     char method[METHOD_SIZE];
     get_request_method(request, method, sizeof(method));
 
     for (size_t i = 0; i < sizeof(handlers) / sizeof(handlers[0]); ++i) {
         if (strcmp(method, handlers[i].method) == 0) {
-            return handlers[i].handler(client_fd, request, rootDir);
+            return handlers[i].handler(client_fd, request, root_dir);
         }
     }
 
     fprintf(stderr, "Unknown method: %s\n", method);
     return ERROR_GENERIC;
 }
-int handle_get(const int client_fd, const char* request, const char* rootDir) {
-    size_t header_length, content_length;
-    char* file_content = get_file_content(request, rootDir, &content_length);
+int send_404_response(const int client_fd) {
+    const char* body = "<html><body><h1>404 Not Found</h1><a href='index.html'>Go home</a></body></html>";
     char header[HEADER_SIZE];
-    if (file_content == NULL) {
-        const char* body = "<html><body><h1>404 Not Found</h1><a href='index.html'>Go home</a></body></html>";
-        header_length = snprintf(header, sizeof(header),
-            "HTTP/1.1 404 Not Found\r\n"
-            "Content-Length: %zu\r\n"
-            "Content-Type: text/html\r\n"
-            "Connection: close\r\n"
-            "\r\n%s", strlen(body), body);
+    int header_length = snprintf(header, sizeof(header),
+        "HTTP/1.1 404 Not Found\r\n"
+        "Content-Length: %zu\r\n"
+        "Content-Type: text/html\r\n"
+        "Connection: close\r\n"
+        "\r\n%s", strlen(body), body);
 
-        if (send_client_response(client_fd, header, strlen(header), 0) < 0) {
-            return OK;
-        }
+    if (header_length >= sizeof(header)) {
+        return ERROR_OVERFLOW;
+    }
 
-        return OK;
+    if (send_client_response(client_fd, header, strlen(header), 0) < 0) {
+        return ERROR_GENERIC;
+    }
+
+    return OK;
+}
+int send_file_response(const int client_fd, const char* request, const char* root_dir, const char* content, const size_t content_length) {
+    const size_t contentLength = strlen(content);
+    char header[HEADER_SIZE];
+    const char* mime_type = get_mime_type(request, root_dir);
+
+    int header_length = snprintf(header, sizeof(header),
+        "HTTP/1.1 200 OK\r\n"
+        "Content-Length: %zu\r\n"
+        "Content-Type: %s\r\n"
+        "Connection: close\r\n"
+        "\r\n", contentLength, mime_type);
+
+    if (header_length >= sizeof(header)) {
+        return ERROR_OVERFLOW;
+    }
+
+    if (header_length + contentLength >= sizeof(header)) {
+        return ERROR_OVERFLOW;
+    }
+
+    if (send_client_response(client_fd, header, strlen(header), 0) < 0) {
+        return ERROR_GENERIC;
+    }
+
+    if (send_client_response(client_fd, content, content_length, 0) < 0) {
+        return ERROR_GENERIC;
+    }
+
+    return OK;
+}
+int handle_get(const int client_fd, const char* request, const char* root_dir) {
+    size_t content_length;
+    char* file_content = get_file_content(request, root_dir, &content_length);
+
+    if (!file_content) {
+        return send_404_response(client_fd);
     } else {
-        size_t contentLength = strlen(file_content);
-        const char* mime_type = get_mime_type(request, rootDir);
-
-        header_length = snprintf(header, sizeof(header),
-            "HTTP/1.1 200 OK\r\n"
-            "Content-Length: %zu\r\n"
-            "Content-Type: %s\r\n"
-            "Connection: close\r\n"
-            "\r\n", contentLength, mime_type);
-
-        if (header_length >= sizeof(header)) {
+        if (send_file_response(client_fd, request, root_dir, file_content, content_length) < 0) {
             free(file_content);
-            return ERROR_OVERFLOW;
-        }
-
-        if (header_length + contentLength >= sizeof(header)) {
-            free(file_content);
-            return ERROR_OVERFLOW;
-        }
-
-        if (send_client_response(client_fd, header, strlen(header), 0) < 0) {
             return ERROR_GENERIC;
         }
-
-        if (send_client_response(client_fd, file_content, strlen(file_content), 0) < 0) {
-            return ERROR_GENERIC;
-        }
-
         free(file_content);
         return OK;
-
     }
 }
-int handle_head(const char* request, const char* rootDir, char* buff, const size_t buffSize) {
+int handle_head(const char* request, const char* root_dir) {
     return ERROR_GENERIC;
 }
-int handle_post(const char* request, const char* rootDir, char* buff, const size_t buffSize) {
+int handle_post(const char* request, const char* root_dir) {
     return ERROR_GENERIC;
 }
-int handle_put(const char* request, const char* rootDir, char* buff, const size_t buffSize) {
+int handle_put(const char* request, const char* root_dir) {
     return ERROR_GENERIC;
 }
-int handle_delete(const char* request, const char* rootDir, char* buff, const size_t buffSize) {
+int handle_delete(const char* request, const char* root_dir) {
     return ERROR_GENERIC;
 }
-int handle_options(const char* request, const char* rootDir, char* buff, const size_t buffSize) {
+int handle_options(const char* request, const char* root_dir) {
     return ERROR_GENERIC;
 }
-int handle_patch(const char* request, const char* rootDir, char* buff, const size_t buffSize) {
+int handle_patch(const char* request, const char* root_dir) {
     return ERROR_GENERIC;
 }
-int handle_connect(const char* request, const char* rootDir, char* buff, const size_t buffSize) {
+int handle_connect(const char* request, const char* root_dir) {
     return ERROR_GENERIC;
 }
-int handle_trace(const char* request, const char* rootDir, char* buff, const size_t buffSize) {
+int handle_trace(const char* request, const char* root_dir) {
     return ERROR_GENERIC;
 }

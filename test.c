@@ -15,7 +15,6 @@ void launch(struct Server *server) {
 
     while (1) {
         char request[REQUEST_SIZE] = {0};
-        char *response = calloc(RESPONSE_SIZE, sizeof(char));
         const char* rootDir = "../testWeb/";
 
         printf("Waiting for connection...\n");
@@ -29,13 +28,11 @@ void launch(struct Server *server) {
             continue;
         }
 
-        if (handle_response(clientHandle, request, rootDir, response, RESPONSE_SIZE) < 0) {
+        if (handle_response(clientHandle, request, rootDir) < 0) {
             continue;
         }
 
         printf("\nResponse sent\n, closing connection.\n");
-
-        free(response);
 
         shutdown(clientHandle, SHUT_RDWR);
         close(clientHandle);

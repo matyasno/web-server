@@ -11,25 +11,29 @@
 
 // net shit
 int get_client_handle(struct Server *server);
-int get_client_request(int clientHandle, char* buff, size_t buffSize);
-int send_client_response(const int clientHandle, const char* buff, const size_t buffSize, const int flags);
+int get_client_request(int client_fd, char* buff, size_t buff_size);
+int send_client_response(const int client_fd, const char* buff, const size_t buff_size, const int flags);
 
 // parsing requests/building responses
-char* get_file_content(const char* request, const char* rootDir, size_t* outSize);
-int get_requested_file(const char* request, char* buff, const size_t buffSize);
+char* get_file_content(const char* request, const char* root_dir, size_t* outSize);
+int get_requested_file(const char* request, char* buff, const size_t buff_size);
 int get_file_path(const char* request, const char* currentWorkingDir, char* buff, const size_t buffSize);
 int get_request_method(const char* request, char* buff, const size_t buffSize);
-int handle_response(const int client_fd,const char* request, const char* rootDir, char* buff, const size_t buffSize);
+int handle_response(const int client_fd,const char* request, const char* root_dir);
 const char* get_mime_type(const char* request, const char* rootDir);
+int send_404_response(const int client_fd);
+int send_file_response(const int client_fd, const char* request, const char* root_dir, const char* content, const size_t content_length);
+int send_body(int client_fd, const char* body, const size_t body_length, int flags);
+int send_header(int client_fd, const char* header, const size_t header_length, int flags);
 
 // method handling
-int handle_get(const int client_fd, const char* request, const char* rootDir);
-int handle_head(const char* request, const char* rootDir, char* buff, const size_t buffSize);
-int handle_post(const char* request, const char* rootDir, char* buff, const size_t buffSize);
-int handle_put(const char* request, const char* rootDir, char* buff, const size_t buffSize);
-int handle_delete(const char* request, const char* rootDir, char* buff, const size_t buffSize);
-int handle_options(const char* request, const char* rootDir, char* buff, const size_t buffSize);
-int handle_patch(const char* request, const char* rootDir, char* buff, const size_t buffSize);
-int handle_connect(const char* request, const char* rootDir, char* buff, const size_t buffSize);
-int handle_trace(const char* request, const char* rootDir, char* buff, const size_t buffSize);
+int handle_get(const int client_fd, const char* request, const char* root_dir);
+int handle_head(const char* request, const char* root_dir);
+int handle_post(const char* request, const char* root_dir);
+int handle_put(const char* request, const char* root_dir);
+int handle_delete(const char* request, const char* root_dir);
+int handle_options(const char* request, const char* root_dir);
+int handle_patch(const char* request, const char* root_dir);
+int handle_connect(const char* request, const char* root_dir);
+int handle_trace(const char* request, const char* root_dir);
 
