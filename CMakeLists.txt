@@ -1,16 +1,16 @@
 cmake_minimum_required(VERSION 3.30)
-project(Cserver)
+project(web-server)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_executable(Cserver test.c
-        Server.c
-        Server.h
-        servUtil.c
-        servUtil.h)
+add_executable(web-server test.c
+        server.c
+        server.h
+        server_utils.c
+        server_utils.h)
 
 IF (WIN32)
-    target_link_libraries(Cserver ws2_32)
+    target_link_libraries(web-server ws2_32)
 ELSE ()
-    target_link_libraries(Cserver)
+    target_link_libraries(web-server)
 ENDIF ()
