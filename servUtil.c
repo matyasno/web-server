@@ -137,7 +137,7 @@ char* get_file_content(const char* request, const char* root_dir, size_t* outSiz
     }
 
     fseek(file, 0, SEEK_END);
-    long size = ftell(file);
+    const long size = ftell(file);
     rewind(file);
     *outSize = size;
 
@@ -190,6 +190,18 @@ int handle_response(const int client_fd, const char* request, const char* root_d
     fprintf(stderr, "Unknown method: %s\n", method);
     return ERROR_GENERIC;
 }
+int send_body(const int client_fd, const char* body, const size_t body_length,const int flags) {
+    if (send_client_response(client_fd, body, body_length, flags) < 0) {
+        return ERROR_GENERIC;
+    }
+    return OK;
+}
+int send_header(const int client_fd, const char* header, const size_t header_length,const int flags) {
+    if (send_client_response(client_fd, header, header_length, flags) < 0) {
+        return ERROR_GENERIC;
+    }
+    return OK;
+}
 int send_404_response(const int client_fd) {
     const char* body = "<html><body><h1>404 Not Found</h1><a href='index.html'>Go home</a></body></html>";
     char header[HEADER_SIZE];
@@ -204,7 +216,7 @@ int send_404_response(const int client_fd) {
         return ERROR_OVERFLOW;
     }
 
-    if (send_client_response(client_fd, header, strlen(header), 0) < 0) {
+    if (send_header(client_fd, header, strlen(header), 0) < 0) {
         return ERROR_GENERIC;
     }
 
@@ -230,11 +242,11 @@ int send_file_response(const int client_fd, const char* request, const char* roo
         return ERROR_OVERFLOW;
     }
 
-    if (send_client_response(client_fd, header, strlen(header), 0) < 0) {
+    if (send_header(client_fd, header, strlen(header), 0) < 0) {
         return ERROR_GENERIC;
     }
 
-    if (send_client_response(client_fd, content, content_length, 0) < 0) {
+    if (send_body(client_fd, content, content_length, 0) < 0) {
         return ERROR_GENERIC;
     }
 
