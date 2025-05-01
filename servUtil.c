@@ -127,13 +127,13 @@ int get_file_path(const char* request, const char* currentWorkingDir, char* buff
 char* get_file_content(const char* request, const char* root_dir, size_t* outSize) {
     char path[PATH_SIZE];
     if (get_file_path(request, root_dir, path, sizeof(path)) != 0) {
-        return NULL;
+        return nullptr;
     }
 
     FILE *file = fopen(path, "rb");
     if (file == NULL) {
         printf("File not found: %s\n", path);
-        return NULL;
+        return nullptr;
     }
 
     fseek(file, 0, SEEK_END);
@@ -145,16 +145,16 @@ char* get_file_content(const char* request, const char* root_dir, size_t* outSiz
     if (content == NULL) {
         perror("Failed to allocate memory");
         fclose(file);
-        return NULL;
+        return nullptr;
     }
 
-    size_t bytesRead = fread(content, 1, size, file);
+    const size_t bytesRead = fread(content, 1, size, file);
 
     if (bytesRead != size) {
         perror("Failed to read file");
         fclose(file);
         free(content);
-        return NULL;
+        return nullptr;
     }
 
     content[size] = '\0'; //nemuzu pouzit u bin souboru
@@ -227,7 +227,7 @@ int send_file_response(const int client_fd, const char* request, const char* roo
     char header[HEADER_SIZE];
     const char* mime_type = get_mime_type(request, root_dir);
 
-    int header_length = snprintf(header, sizeof(header),
+    const int header_length = snprintf(header, sizeof(header),
         "HTTP/1.1 200 OK\r\n"
         "Content-Length: %zu\r\n"
         "Content-Type: %s\r\n"

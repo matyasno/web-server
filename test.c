@@ -18,24 +18,24 @@ void launch(struct Server *server) {
         const char* rootDir = "../testWeb/";
 
         printf("Waiting for connection...\n");
-        const int clientHandle = get_client_handle(server);
+        const int client_fd = get_client_handle(server);
 
-        if (clientHandle <= 0) {
+        if (client_fd <= 0) {
             continue;
         }
 
-        if (get_client_request(clientHandle, request, sizeof(request) - 1) < 0) {
+        if (get_client_request(client_fd, request, sizeof(request) - 1) < 0) {
             continue;
         }
 
-        if (handle_response(clientHandle, request, rootDir) < 0) {
+        if (handle_response(client_fd, request, rootDir) < 0) {
             continue;
         }
 
-        printf("\nResponse sent\n, closing connection.\n");
+        printf("Response sent, closing connection.\n\n");
 
-        shutdown(clientHandle, SHUT_RDWR);
-        close(clientHandle);
+        shutdown(client_fd, SHUT_RDWR);
+        close(client_fd);
     }
 }
 
