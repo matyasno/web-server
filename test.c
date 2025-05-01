@@ -1,7 +1,7 @@
 #include <unistd.h>
 #include <string.h>
 
-#include "servUtil.h"
+#include "server_utils.h"
 
 #ifdef _WIN32
     #define SHUT_RDWR SD_BOTH
