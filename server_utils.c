@@ -207,7 +207,7 @@ int send_404_response(const int client_fd) {
         "Content-Length: %zu\r\n"
         "Content-Type: text/html\r\n"
         "Connection: close\r\n"
-        "\r\n%s", strlen(body), body);
+        "\r\n", strlen(body));
 
     if (header_length >= sizeof(header)) {
         return ERROR_OVERFLOW;
@@ -217,10 +217,13 @@ int send_404_response(const int client_fd) {
         return ERROR_GENERIC;
     }
 
+    if (send_body(client_fd, body, strlen(body), 0) < 0) {
+        return ERROR_GENERIC;
+    }
+
     return OK;
 }
 int send_file_response(const int client_fd, const char* request, const char* root_dir, const char* content, const size_t content_length) {
-    const size_t contentLength = strlen(content);
     char header[HEADER_SIZE];
     const char* mime_type = get_mime_type(request, root_dir);
 
@@ -229,13 +232,9 @@ int send_file_response(const int client_fd, const char* request, const char* roo
         "Content-Length: %zu\r\n"
         "Content-Type: %s\r\n"
         "Connection: close\r\n"
-        "\r\n", contentLength, mime_type);
+        "\r\n", content_length, mime_type);
 
     if (header_length >= sizeof(header)) {
-        return ERROR_OVERFLOW;
-    }
-
-    if (header_length + contentLength >= sizeof(header)) {
         return ERROR_OVERFLOW;
     }
 
