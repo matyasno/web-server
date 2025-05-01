@@ -2,7 +2,7 @@
 // Created by matyas on 4/20/25.
 //
 
-#include "servUtil.h"
+#include "server_utils.h"
 
 #include <stdio.h>
 #include <stdlib.h>
