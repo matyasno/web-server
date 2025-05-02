@@ -8,7 +8,6 @@
 #include "server.h"
 
 // parsing requests/building responses
-char* get_file_content(const char* request, const char* root_dir, size_t* outSize);
 
 int handle_response(int client_fd,const char* request, const char* root_dir);
 const char* get_mime_type(const char* request, const char* rootDir);

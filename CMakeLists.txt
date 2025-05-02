@@ -12,7 +12,9 @@ add_executable(web-server test.c
         net_utils.h
         defines.h
         request_parser.h
-        request_parser.c)
+        request_parser.c
+        file_utils.h
+        file_utils.c)
 
 IF (WIN32)
     target_link_libraries(web-server ws2_32)
