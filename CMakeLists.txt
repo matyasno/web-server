@@ -3,7 +3,7 @@ project(web-server)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_executable(web-server test.c
+add_executable(web-server main.c
         server.c
         server.h
         request_handler.c
