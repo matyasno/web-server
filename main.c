@@ -11,7 +11,7 @@
     #define SHUT_RDWR SD_BOTH
 #endif
 
-int main(int args, char **argv) {
+int main(int argc, char **argv) {
 #ifdef _WIN32
     WSADATA wsa;
     if (WSAStartup(MAKEWORD(2,2), &wsa) != 0) {
@@ -19,7 +19,7 @@ int main(int args, char **argv) {
         exit(1);
     }
 #endif
-    args_check(args, argv);
+    args_check(argc, argv);
 
     struct Server server = server_constructor(AF_INET, SOCK_STREAM, 0, get_host_order_ip(argv[1]), get_host_port(argv[2]), 5);
     start_http_server(&server, argv[3]);

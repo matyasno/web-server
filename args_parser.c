@@ -9,8 +9,8 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 
-void args_check(const int args, char *argv[]) {
-    if (args != 4) {
+void args_check(const int argc, char *argv[]) {
+    if (argc != 4) {
         printf("Usage: <ip> <port> <dir>\n");
         exit(-1);
     }

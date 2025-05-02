@@ -8,6 +8,6 @@
 
 #endif //ARGS_PARSER_H
 
-void args_check(int args, char *argv[]);
+void args_check(int argc, char *argv[]);
 u_long get_host_order_ip(const char *host_ip);
 int get_host_port(const char *host_port);
