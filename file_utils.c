@@ -7,6 +7,7 @@
 #include "defines.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 char* get_file_content(const char* request, const char* root_dir, size_t* outSize) {
     char path[PATH_SIZE];

@@ -30,3 +30,17 @@ int send_client_response(const int client_fd, const char* buff, const size_t buf
     }
     return OK;
 }
+
+int send_body(const int client_fd, const char* body, const size_t body_length,const int flags) {
+    if (send_client_response(client_fd, body, body_length, flags) < 0) {
+        return ERROR_GENERIC;
+    }
+    return OK;
+}
+
+int send_header(const int client_fd, const char* header, const size_t header_length,const int flags) {
+    if (send_client_response(client_fd, header, header_length, flags) < 0) {
+        return ERROR_GENERIC;
+    }
+    return OK;
+}

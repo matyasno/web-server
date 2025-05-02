@@ -7,16 +7,8 @@
 
 #include "server.h"
 
-// parsing requests/building responses
-
 int handle_response(int client_fd,const char* request, const char* root_dir);
-const char* get_mime_type(const char* request, const char* rootDir);
-int send_404_response(int client_fd);
-int send_file_response(int client_fd, const char* request, const char* root_dir, const char* content, size_t content_length);
-int send_body(int client_fd, const char* body, size_t body_length, int flags);
-int send_header(int client_fd, const char* header, size_t header_length, int flags);
 
-// method handling
 int handle_get(int client_fd, const char* request, const char* root_dir);
 int handle_head(const char* request, const char* root_dir);
 int handle_post(const char* request, const char* root_dir);

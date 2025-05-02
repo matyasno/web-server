@@ -78,3 +78,18 @@ int get_file_path(const char* request, const char* currentWorkingDir, char* buff
 
     return OK;
 }
+
+const char* get_mime_type(const char* request, const char* rootDir) {
+    char path[PATH_SIZE];
+    get_file_path(request, rootDir, path, sizeof(path));
+    const char* extension = strrchr(path, '.');
+    if (!extension) return "application/octet-stream";
+    if (strcmp(extension, ".html") == 0) return "text/html";
+    if (strcmp(extension, ".css") == 0) return "text/css";
+    if (strcmp(extension, ".js") == 0) return "application/javascript";
+    if (strcmp(extension, ".png") == 0) return "image/png";
+    if (strcmp(extension, ".gif") == 0) return "image/gif";
+    if (strcmp(extension, ".jpg") == 0) return "image/jpeg";
+    if (strcmp(extension, ".jpeg") == 0) return "image/jpeg";
+    return "application/octet-stream";
+}
