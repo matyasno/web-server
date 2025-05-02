@@ -155,8 +155,7 @@ char* get_file_content(const char* request, const char* root_dir, size_t* outSiz
         return NULL;
     }
 
-    content[size] = '\0'; //nemuzu pouzit u bin souboru
-
+    content[size] = '\0';
     fclose(file);
     return content;
 }
