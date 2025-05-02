@@ -6,8 +6,8 @@ set(CMAKE_CXX_STANDARD 20)
 add_executable(web-server test.c
         server.c
         server.h
-        server_utils.c
-        server_utils.h
+        request_handler.c
+        request_handler.h
         net_utils.c
         net_utils.h
         defines.h
