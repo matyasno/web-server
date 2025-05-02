@@ -2,6 +2,7 @@
 
 #include "server_utils.h"
 #include "net_utils.h"
+#include "request_parser.h"
 #include "defines.h"
 
 #ifdef _WIN32
