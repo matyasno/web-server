@@ -14,7 +14,7 @@ void launch(struct Server *server) {
 
     while (1) {
         char request[REQUEST_SIZE] = {0};
-        const char* rootDir = "../testWeb/";
+        const char* root_dir = "../testWeb/";
 
         printf("Waiting for connection...\n");
         const int client_fd = get_client_handle(server);
@@ -27,7 +27,7 @@ void launch(struct Server *server) {
             continue;
         }
 
-        if (handle_response(client_fd, request, rootDir) < 0) {
+        if (handle_response(client_fd, request, root_dir) < 0) {
             continue;
         }
 
@@ -38,7 +38,7 @@ void launch(struct Server *server) {
     }
 }
 
-int main(int args, char **argv) {
+int main(const int args, char **argv) {
 #ifdef _WIN32
     WSADATA wsa;
     if (WSAStartup(MAKEWORD(2,2), &wsa) != 0) {
@@ -46,6 +46,7 @@ int main(int args, char **argv) {
         exit(1);
     }
 #endif
+
     struct Server server = server_constructor(AF_INET, SOCK_STREAM, 0, INADDR_ANY, 8080, 5, launch);
     server.launch(&server);
     return 0;
