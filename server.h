@@ -1,9 +1,6 @@
 #ifndef SERVER_H
 #define SERVER_H
 
-#include <stdio.h>
-#include <stdlib.h>
-
 #ifdef _WIN32
     #include <winsock2.h>
     #include <ws2tcpip.h>
@@ -23,9 +20,9 @@ struct Server {
     int backlog;
     int socket;
     struct sockaddr_in address;
-    void (*launch)(struct Server *server);
 };
 
-struct Server server_constructor(int domain, int service, int protocol, u_long server_interface, int port, int backlog, void (*launch)(struct Server *server));
+struct Server server_constructor(int domain, int service, int protocol, u_long server_interface, int port, int backlog);
+void start_http_server(struct Server *server, const char* root_dir);
 
 #endif // SERVER_H

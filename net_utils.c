@@ -5,6 +5,8 @@
 #include "net_utils.h"
 #include "defines.h"
 
+#include <stdio.h>
+
 int get_client_handle(struct Server *server) {
     socklen_t address_length = sizeof(server->address);
     const int client_fd = accept(server->socket, (struct sockaddr *)&server->address, &address_length);
