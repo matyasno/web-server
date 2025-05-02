@@ -1,12 +1,12 @@
 #include <unistd.h>
 
 #include "server_utils.h"
+#include "net_utils.h"
+#include "defines.h"
 
 #ifdef _WIN32
     #define SHUT_RDWR SD_BOTH
 #endif
-
-#define REQUEST_SIZE 1000
 
 void launch(struct Server *server) {
     printf("=== SERVER LAUNCHED ===\n");

@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include "net_utils.h"
 
 #define OK 0
 #define ERROR_GENERIC (-1)
@@ -23,30 +24,12 @@ typedef int handler_address(const int, const char *, const char *);
 typedef struct{
     char method[METHOD_SIZE];
     handler_address *handler;
-}html_handlers;
+}http_handlers;
 
-html_handlers handlers[] = {
+http_handlers handlers[] = {
     {"GET",handle_get}
 };
 
-int get_client_handle(struct Server *server) {
-    socklen_t address_length = sizeof(server->address);
-    const int client_fd = accept(server->socket, (struct sockaddr *)&server->address, &address_length);
-
-
-    if (client_fd < 0) {
-        perror("Failed to accept a new connection");
-        return ERROR_GENERIC;
-    }
-
-    char client_ip[INET_ADDRSTRLEN];
-    inet_ntop(AF_INET, &(server->address.sin_addr), client_ip, INET_ADDRSTRLEN);
-    const int client_port = ntohs(server->address.sin_port);
-
-    printf("Client connected: %s:%d\n", client_ip, client_port);
-
-    return client_fd;
-}
 int get_client_request(const int client_fd, char* buff, const size_t buff_size) {
     const ssize_t bytesRead = read(client_fd, buff, buff_size);
 
@@ -63,12 +46,7 @@ int get_client_request(const int client_fd, char* buff, const size_t buff_size) 
     buff[bytesRead] = '\0';
     return OK;
 }
-int send_client_response(const int client_fd, const char* buff, const size_t buff_size, const int flags) {
-    if (send(client_fd, buff, buff_size, flags) < 0) {
-        return ERROR_GENERIC;
-    }
-    return OK;
-}
+
 int get_requested_file(const char* request, char* buff, const size_t buff_size) {
     char method[METHOD_SIZE], path[PATH_SIZE];
 
@@ -201,7 +179,7 @@ int send_header(const int client_fd, const char* header, const size_t header_len
 int send_404_response(const int client_fd) {
     const char* body = "<html><body><h1>404 Not Found</h1><a href='index.html'>Go home</a></body></html>";
     char header[HEADER_SIZE];
-    int header_length = snprintf(header, sizeof(header),
+    const int header_length = snprintf(header, sizeof(header),
         "HTTP/1.1 404 Not Found\r\n"
         "Content-Length: %zu\r\n"
         "Content-Type: text/html\r\n"

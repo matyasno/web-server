@@ -10,9 +10,7 @@
 #include "server.h"
 
 // net shit
-int get_client_handle(struct Server *server);
 int get_client_request(int client_fd, char* buff, size_t buff_size);
-int send_client_response(int client_fd, const char* buff, size_t buff_size, int flags);
 
 // parsing requests/building responses
 char* get_file_content(const char* request, const char* root_dir, size_t* outSize);

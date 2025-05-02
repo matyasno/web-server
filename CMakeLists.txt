@@ -7,7 +7,10 @@ add_executable(web-server test.c
         server.c
         server.h
         server_utils.c
-        server_utils.h)
+        server_utils.h
+        net_utils.c
+        net_utils.h
+        defines.h)
 
 IF (WIN32)
     target_link_libraries(web-server ws2_32)
