@@ -6,21 +6,11 @@
 #include "request_parser.h"
 #include "file_utils.h"
 #include "response.h"
+#include "defines.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
-#include "net_utils.h"
-
-#define OK 0
-#define ERROR_GENERIC (-1)
-#define ERROR_NOT_FOUND (-2)
-#define ERROR_OVERFLOW (-3)
-
-#define METHOD_SIZE 8
-#define PATH_SIZE 1024
-#define HEADER_SIZE 1024
 
 typedef int handler_address(const int, const char *, const char *);
 
