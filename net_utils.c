@@ -11,7 +11,6 @@ int get_client_handle(struct Server *server) {
     socklen_t address_length = sizeof(server->address);
     const int client_fd = accept(server->socket, (struct sockaddr *)&server->address, &address_length);
 
-
     if (client_fd < 0) {
         perror("Failed to accept a new connection");
         return ERROR_GENERIC;
