@@ -17,12 +17,6 @@ int get_client_handle(struct Server *server) {
         return ERROR_GENERIC;
     }
 
-    char client_ip[INET_ADDRSTRLEN];
-    inet_ntop(AF_INET, &(server->address.sin_addr), client_ip, INET_ADDRSTRLEN);
-    const int client_port = ntohs(server->address.sin_port);
-
-    printf("Client connected: %s:%d\n", client_ip, client_port);
-
     return client_fd;
 }
 

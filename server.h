@@ -15,14 +15,15 @@ struct Server {
     int domain;
     int service;
     int protocol;
-    u_long server_interface;
+    const char* server_interface;
     int port;
     int backlog;
     int socket;
-    struct sockaddr_in address;
+    struct sockaddr_storage address;
+    socklen_t address_len;
 };
 
-struct Server server_constructor(int domain, int service, int protocol, u_long server_interface, int port, int backlog);
+struct Server server_constructor(int domain, int service, int protocol, const char* server_interface, int port, int backlog);
 void start_http_server(struct Server *server, const char* root_dir);
 
 #endif // SERVER_H

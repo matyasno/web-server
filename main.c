@@ -21,7 +21,7 @@ int main(int argc, char **argv) {
 #endif
     args_check(argc, argv);
 
-    struct Server server = server_constructor(AF_INET, SOCK_STREAM, 0, get_host_order_ip(argv[1]), get_host_port(argv[2]), 5);
+    struct Server server = server_constructor(AF_INET6, SOCK_STREAM, 0, argv[1], get_host_port(argv[2]), 5);
     start_http_server(&server, argv[3]);
     return 0;
 }

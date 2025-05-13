@@ -9,7 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-struct Server server_constructor(int domain, int service, int protocol, u_long server_interface, int port, int backlog) {
+struct Server server_constructor(int domain, int service, const int protocol, const char* server_interface, int port, int backlog) {
     struct Server server;
     server.domain = domain;
     server.service = service;
@@ -18,28 +18,42 @@ struct Server server_constructor(int domain, int service, int protocol, u_long s
     server.port = port;
     server.backlog = backlog;
 
-    server.address.sin_family = domain;
-    server.address.sin_port = htons(port);
-    server.address.sin_addr.s_addr = htonl(server_interface);
+    if (domain == AF_INET) {
+        struct sockaddr_in *addr = (struct sockaddr_in*)&server.address;
+        addr->sin_family = AF_INET;
+        addr->sin_port = htons(port);
+        inet_pton(AF_INET, server_interface, &addr->sin_addr);
+        server.address_len = sizeof(struct sockaddr_in);
+    } else if (domain == AF_INET6) {
+        struct sockaddr_in6 *addr6 = (struct sockaddr_in6*)&server.address;
+        addr6->sin6_family = AF_INET6;
+        addr6->sin6_port = htons(port);
+        inet_pton(AF_INET6, server_interface, &addr6->sin6_addr);
+        server.address_len = sizeof(struct sockaddr_in6);
+    } else {
+        fprintf(stderr, "Unsupported domain\n");
+        exit(EXIT_FAILURE);
+    }
 
     server.socket = socket(domain, service, protocol);
-    if (server.socket == 0) {
+    if (server.socket < 0) {
         perror("Failed to create socket");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 
-    if (bind(server.socket, (struct sockaddr *)&server.address, sizeof(server.address)) < 0) {
+    if (bind(server.socket, (struct sockaddr*)&server.address, server.address_len) < 0) {
         perror("Failed to bind socket");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 
-    if (listen(server.socket, server.backlog) < 0) {
+    if (listen(server.socket, backlog) < 0) {
         perror("Failed to start listening");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 
     return server;
 }
+
 
 void start_http_server(struct Server *server, const char* root_dir) {
     printf("=== SERVER LAUNCHED ===\n");
