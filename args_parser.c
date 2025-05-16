@@ -29,7 +29,7 @@ int parse_port(const char *host_port) {
     long port_long = strtol(host_port, &endptr, 10);
 
     if (*endptr != '\0' || port_long < 1 || port_long > 65535) {
-        fprintf(stderr, "Neplatné číslo portu: %s\n", host_port);
+        fprintf(stderr, "Invalid port number: %s\n", host_port);
         return ERROR_GENERIC;
     } else {
         port = (int)port_long;
