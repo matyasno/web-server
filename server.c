@@ -20,8 +20,15 @@ struct Server server_constructor(int service, const int protocol, const char* se
     server.port = port;
     server.backlog = backlog;
 
-    get_address_family(&server);
-    init_socket_address(&server);
+    if (get_address_family(&server) != OK) {
+        perror("Failed to get address family");
+        exit(EXIT_FAILURE);
+    }
+
+    if (init_socket_address(&server) != OK) {
+        perror("Failed to initialize socket address");
+        exit(EXIT_FAILURE);
+    }
 
     server.socket = socket(server.family, server.service, server.protocol);
     if (server.socket < 0) {
@@ -29,12 +36,12 @@ struct Server server_constructor(int service, const int protocol, const char* se
         exit(EXIT_FAILURE);
     }
 
-    if (bind(server.socket, (struct sockaddr*)&server.address, server.address_len) < 0) {
+    if (bind(server.socket, (struct sockaddr*)&server.address, server.address_len) < OK) {
         perror("Failed to bind socket");
         exit(EXIT_FAILURE);
     }
 
-    if (listen(server.socket, backlog) < 0) {
+    if (listen(server.socket, backlog) < OK) {
         perror("Failed to start listening");
         exit(EXIT_FAILURE);
     }
@@ -76,13 +83,13 @@ int init_socket_address(struct Server *server) {
     if (server->family == AF_INET) {
         struct sockaddr_in *addr = (struct sockaddr_in*)&server->address;
         addr->sin_family = AF_INET;
-        addr->sin_port = htons(get_host_port(server->port));
+        addr->sin_port = htons(parse_port(server->port));
         inet_pton(AF_INET, server->server_interface, &addr->sin_addr);
         server->address_len = sizeof(struct sockaddr_in);
     } else if (server->family == AF_INET6) {
         struct sockaddr_in6 *addr6 = (struct sockaddr_in6*)&server->address;
         addr6->sin6_family = AF_INET6;
-        addr6->sin6_port = htons(get_host_port(server->port));
+        addr6->sin6_port = htons(parse_port(server->port));
         inet_pton(AF_INET6, server->server_interface, &addr6->sin6_addr);
         server->address_len = sizeof(struct sockaddr_in6);
     } else {
@@ -101,7 +108,7 @@ int get_address_family(struct Server *server) {
     int err = getaddrinfo(server->server_interface, server->port, &hints, &res);
     if (err != 0) {
         fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(err));
-        exit(EXIT_FAILURE);
+        return ERROR_GENERIC;
     }
     server->family = res->ai_family;
     freeaddrinfo(res);
