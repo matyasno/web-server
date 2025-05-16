@@ -11,8 +11,8 @@
 #include <netinet/in.h>
 
 void args_check(const int argc, char **argv) {
-    if (argc != 5) {
-        printf("Usage: <address family> <ip> <port> <dir>\n");
+    if (argc != 4) {
+        printf("Usage: <ip> <port> <dir>\n");
         exit(-1);
     }
 }

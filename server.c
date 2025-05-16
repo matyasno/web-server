@@ -4,30 +4,46 @@
 #include "net_utils.h"
 #include "request_handler.h"
 #include "request_parser.h"
+#include "args_parser.h"
 
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <netdb.h>
+#include <memory.h>
 
-struct Server server_constructor(int domain, int service, const int protocol, const char* server_interface, int port, int backlog) {
+struct Server server_constructor(int service, const int protocol, const char* server_interface, const char* port, int backlog) {
     struct Server server;
-    server.domain = domain;
     server.service = service;
     server.protocol = protocol;
     server.server_interface = server_interface;
-    server.port = port;
+    server.port = get_host_port(port);
     server.backlog = backlog;
 
-    if (domain == AF_INET) {
+    struct addrinfo hints, *res;
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = AF_UNSPEC;
+    hints.ai_socktype = SOCK_STREAM;
+
+    int err = getaddrinfo(server_interface, port, &hints, &res);
+    if (err != 0) {
+        fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(err));
+        exit(EXIT_FAILURE);
+    }
+
+    server.domain = res->ai_family;
+    freeaddrinfo(res);
+
+    if (server.domain == AF_INET) {
         struct sockaddr_in *addr = (struct sockaddr_in*)&server.address;
         addr->sin_family = AF_INET;
-        addr->sin_port = htons(port);
+        addr->sin_port = htons(server.port);
         inet_pton(AF_INET, server_interface, &addr->sin_addr);
         server.address_len = sizeof(struct sockaddr_in);
-    } else if (domain == AF_INET6) {
+    } else if (server.domain == AF_INET6) {
         struct sockaddr_in6 *addr6 = (struct sockaddr_in6*)&server.address;
         addr6->sin6_family = AF_INET6;
-        addr6->sin6_port = htons(port);
+        addr6->sin6_port = htons(server.port);
         inet_pton(AF_INET6, server_interface, &addr6->sin6_addr);
         server.address_len = sizeof(struct sockaddr_in6);
     } else {
@@ -35,7 +51,7 @@ struct Server server_constructor(int domain, int service, const int protocol, co
         exit(EXIT_FAILURE);
     }
 
-    server.socket = socket(domain, service, protocol);
+    server.socket = socket(server.domain, server.service, server.protocol);
     if (server.socket < 0) {
         perror("Failed to create socket");
         exit(EXIT_FAILURE);

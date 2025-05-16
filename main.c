@@ -20,8 +20,7 @@ int main(int argc, char **argv) {
     }
 #endif
     args_check(argc, argv);
-
-    struct Server server = server_constructor(get_address_family(argv[1]), SOCK_STREAM, 0, argv[2], get_host_port(argv[3]), 5);
-    start_http_server(&server, argv[4]);
+    struct Server server = server_constructor(SOCK_STREAM, 0, argv[1], argv[2], 5);
+    start_http_server(&server, argv[3]);
     return 0;
 }

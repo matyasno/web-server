@@ -23,7 +23,7 @@ struct Server {
     socklen_t address_len;
 };
 
-struct Server server_constructor(int domain, int service, int protocol, const char* server_interface, int port, int backlog);
+struct Server server_constructor(int service, int protocol, const char* server_interface, const char* port, int backlog);
 void start_http_server(struct Server *server, const char* root_dir);
 
 #endif // SERVER_H
