@@ -17,41 +17,13 @@ struct Server server_constructor(int service, const int protocol, const char* se
     server.service = service;
     server.protocol = protocol;
     server.server_interface = server_interface;
-    server.port = get_host_port(port);
+    server.port = port;
     server.backlog = backlog;
 
-    struct addrinfo hints, *res;
-    memset(&hints, 0, sizeof(hints));
-    hints.ai_family = AF_UNSPEC;
-    hints.ai_socktype = SOCK_STREAM;
+    get_address_family(&server);
+    init_socket_address(&server);
 
-    int err = getaddrinfo(server_interface, port, &hints, &res);
-    if (err != 0) {
-        fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(err));
-        exit(EXIT_FAILURE);
-    }
-
-    server.domain = res->ai_family;
-    freeaddrinfo(res);
-
-    if (server.domain == AF_INET) {
-        struct sockaddr_in *addr = (struct sockaddr_in*)&server.address;
-        addr->sin_family = AF_INET;
-        addr->sin_port = htons(server.port);
-        inet_pton(AF_INET, server_interface, &addr->sin_addr);
-        server.address_len = sizeof(struct sockaddr_in);
-    } else if (server.domain == AF_INET6) {
-        struct sockaddr_in6 *addr6 = (struct sockaddr_in6*)&server.address;
-        addr6->sin6_family = AF_INET6;
-        addr6->sin6_port = htons(server.port);
-        inet_pton(AF_INET6, server_interface, &addr6->sin6_addr);
-        server.address_len = sizeof(struct sockaddr_in6);
-    } else {
-        fprintf(stderr, "Unsupported domain\n");
-        exit(EXIT_FAILURE);
-    }
-
-    server.socket = socket(server.domain, server.service, server.protocol);
+    server.socket = socket(server.family, server.service, server.protocol);
     if (server.socket < 0) {
         perror("Failed to create socket");
         exit(EXIT_FAILURE);
@@ -98,4 +70,40 @@ void start_http_server(struct Server *server, const char* root_dir) {
         shutdown(client_fd, SHUT_RDWR);
         close(client_fd);
     }
+}
+
+int init_socket_address(struct Server *server) {
+    if (server->family == AF_INET) {
+        struct sockaddr_in *addr = (struct sockaddr_in*)&server->address;
+        addr->sin_family = AF_INET;
+        addr->sin_port = htons(get_host_port(server->port));
+        inet_pton(AF_INET, server->server_interface, &addr->sin_addr);
+        server->address_len = sizeof(struct sockaddr_in);
+    } else if (server->family == AF_INET6) {
+        struct sockaddr_in6 *addr6 = (struct sockaddr_in6*)&server->address;
+        addr6->sin6_family = AF_INET6;
+        addr6->sin6_port = htons(get_host_port(server->port));
+        inet_pton(AF_INET6, server->server_interface, &addr6->sin6_addr);
+        server->address_len = sizeof(struct sockaddr_in6);
+    } else {
+        fprintf(stderr, "Unsupported domain\n");
+        return ERROR_GENERIC;
+    }
+    return OK;
+}
+
+int get_address_family(struct Server *server) {
+    struct addrinfo hints, *res;
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = AF_UNSPEC;
+    hints.ai_socktype = SOCK_STREAM;
+
+    int err = getaddrinfo(server->server_interface, server->port, &hints, &res);
+    if (err != 0) {
+        fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(err));
+        exit(EXIT_FAILURE);
+    }
+    server->family = res->ai_family;
+    freeaddrinfo(res);
+    return OK;
 }

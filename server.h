@@ -12,11 +12,11 @@
 #endif
 
 struct Server {
-    int domain;
+    int family;
     int service;
     int protocol;
     const char* server_interface;
-    int port;
+    const char* port;
     int backlog;
     int socket;
     struct sockaddr_storage address;
@@ -25,5 +25,8 @@ struct Server {
 
 struct Server server_constructor(int service, int protocol, const char* server_interface, const char* port, int backlog);
 void start_http_server(struct Server *server, const char* root_dir);
+
+int init_socket_address(struct Server *server);
+int get_address_family(struct Server *server);
 
 #endif // SERVER_H

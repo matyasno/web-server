@@ -11,4 +11,3 @@
 void args_check(int argc, char *argv[]);
 u_long get_host_order_ip(const char *host_ip);
 int get_host_port(const char *host_port);
-int get_address_family(const char *address_family);
