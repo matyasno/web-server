@@ -11,8 +11,9 @@
 #include <stdlib.h>
 #include <netdb.h>
 #include <memory.h>
+#include <arpa/inet.h>
 
-struct Server server_constructor(int service, const int protocol, const char* server_interface, const char* port, int backlog) {
+struct Server create_server(const int service, const int protocol, const char* server_interface, const char* port, const int backlog) {
     struct Server server;
     server.service = service;
     server.protocol = protocol;
@@ -26,12 +27,13 @@ struct Server server_constructor(int service, const int protocol, const char* se
     }
 
     if (init_address(&server) != OK) {
-        perror("Failed to initialize socket address");
+        perror("Failed to initialize address");
         exit(EXIT_FAILURE);
     }
 
     if (create_socket(&server) != OK) {
         perror("Failed to create socket");
+        exit(EXIT_FAILURE);
     }
 
     if (bind(server.socket, (struct sockaddr*)&server.address, server.address_len) < OK) {
@@ -91,7 +93,7 @@ int init_address(struct Server *server) {
         inet_pton(AF_INET6, server->server_interface, &addr6->sin6_addr);
         server->address_len = sizeof(struct sockaddr_in6);
     } else {
-        fprintf(stderr, "Unsupported domain\n");
+        fprintf(stderr, "Unsupported address family\n");
         return ERROR_GENERIC;
     }
     return OK;

@@ -1,15 +1,5 @@
-#include <unistd.h>
-
 #include "server.h"
-
-#include <stdlib.h>
-#include <stdio.h>
-
 #include "args_parser.h"
-
-#ifdef _WIN32
-    #define SHUT_RDWR SD_BOTH
-#endif
 
 int main(int argc, char **argv) {
 #ifdef _WIN32
@@ -19,8 +9,14 @@ int main(int argc, char **argv) {
         exit(1);
     }
 #endif
+
     args_check(argc, argv);
-    struct Server server = server_constructor(SOCK_STREAM, 0, argv[1], argv[2], 5);
+    struct Server server = create_server(SOCK_STREAM, 0, argv[1], argv[2], 5);
     start_http_server(&server, argv[3]);
     return 0;
+
+#ifdef _WIN32
+    WSACleanup();
+#endif
+
 }

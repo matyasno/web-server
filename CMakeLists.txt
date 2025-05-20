@@ -18,7 +18,8 @@ add_executable(web-server main.c
         response.c
         response.h
         args_parser.c
-        args_parser.h)
+        args_parser.h
+)
 
 IF (WIN32)
     target_link_libraries(web-server ws2_32)

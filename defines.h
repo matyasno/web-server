@@ -5,6 +5,10 @@
 #ifndef DEFINES_H
 #define DEFINES_H
 
+#ifdef _WIN32
+    #define SHUT_RDWR SD_BOTH
+#endif
+
 #define OK 0
 #define ERROR_GENERIC (-1)
 #define ERROR_NOT_FOUND (-2)

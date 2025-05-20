@@ -7,8 +7,6 @@
     typedef int socklen_t;
 #else
 #include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
 #endif
 
 struct Server {
@@ -23,7 +21,7 @@ struct Server {
     socklen_t address_len;
 };
 
-struct Server server_constructor(int service, int protocol, const char* server_interface, const char* port, int backlog);
+struct Server create_server(int service, int protocol, const char* server_interface, const char* port, int backlog);
 void start_http_server(struct Server *server, const char* root_dir);
 
 int init_address(struct Server *server);
