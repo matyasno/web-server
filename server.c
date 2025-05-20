@@ -25,15 +25,13 @@ struct Server server_constructor(int service, const int protocol, const char* se
         exit(EXIT_FAILURE);
     }
 
-    if (init_socket_address(&server) != OK) {
+    if (init_address(&server) != OK) {
         perror("Failed to initialize socket address");
         exit(EXIT_FAILURE);
     }
 
-    server.socket = socket(server.family, server.service, server.protocol);
-    if (server.socket < 0) {
+    if (create_socket(&server) != OK) {
         perror("Failed to create socket");
-        exit(EXIT_FAILURE);
     }
 
     if (bind(server.socket, (struct sockaddr*)&server.address, server.address_len) < OK) {
@@ -79,7 +77,7 @@ void start_http_server(struct Server *server, const char* root_dir) {
     }
 }
 
-int init_socket_address(struct Server *server) {
+int init_address(struct Server *server) {
     if (server->family == AF_INET) {
         struct sockaddr_in *addr = (struct sockaddr_in*)&server->address;
         addr->sin_family = AF_INET;
@@ -112,5 +110,13 @@ int get_address_family(struct Server *server) {
     }
     server->family = res->ai_family;
     freeaddrinfo(res);
+    return OK;
+}
+
+int create_socket(struct Server *server) {
+    server->socket = socket(server->family, server->service, server->protocol);
+    if (server->socket < 0) {
+        return ERROR_GENERIC;
+    }
     return OK;
 }
