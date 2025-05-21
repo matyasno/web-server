@@ -36,6 +36,9 @@ struct Server create_server(const int service, const int protocol, const char* s
         exit(EXIT_FAILURE);
     }
 
+    int opt = 1;
+    setsockopt(server.socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
+
     if (bind(server.socket, (struct sockaddr*)&server.address, server.address_len) < OK) {
         perror("Failed to bind socket");
         exit(EXIT_FAILURE);
