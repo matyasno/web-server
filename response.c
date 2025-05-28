@@ -47,7 +47,7 @@ int send_404_response(const int client_fd) {
         "Connection: close\r\n"
         "\r\n", strlen(body));
 
-    if (header_length >= sizeof(header) < 0) {
+    if (header_length >= sizeof(header)) {
         return ERROR_OVERFLOW;
     }
 
