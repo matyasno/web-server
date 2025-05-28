@@ -24,7 +24,12 @@ int send_response(const int client_fd, const char* request, const char* root_dir
     char header[HEADER_SIZE];
     const char* mime_type = get_mime_type(request, root_dir);
 
-    if (build_head("HTTP", "1.1", "200 OK", mime_type, content_length, "close", header, HEADER_SIZE) != OK) {
+    const char* protocol = "HTTP";
+    const char* protocol_ver = "1.1";
+    const char* status = "200 OK";
+    const char* connection_type = "close";
+
+    if (build_head(protocol, protocol_ver, status, mime_type, content_length, connection_type, header, HEADER_SIZE) != OK) {
         return ERROR_GENERIC;
     }
     if (send_header(client_fd, header, strlen(header), 0) != OK) {
@@ -71,6 +76,5 @@ int build_head( const char* protocol, const char* version, const char* status, c
         "\r\n", protocol, version, status, content_length, mime_type, connection_type) >= (int)header_length) {
         return ERROR_OVERFLOW;
     }
-
     return OK;
 }
