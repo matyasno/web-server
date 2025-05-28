@@ -20,7 +20,8 @@ typedef struct{
 }http_handlers;
 
 http_handlers handlers[] = {
-    {"GET",handle_get}
+    {"GET",handle_get},
+    {"HEAD", handle_head}
 };
 int handle_response(const int client_fd, const char* request, const char* root_dir) {
     char method[METHOD_SIZE];
