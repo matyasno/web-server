@@ -42,15 +42,26 @@ int handle_get(const int client_fd, const char* request, const char* root_dir) {
     if (!file_content) {
         return send_404_response(client_fd);
     }
-    if (send_file_response(client_fd, request, root_dir, file_content, content_length) < 0) {
+    if (send_response(client_fd, request, root_dir, file_content, content_length) < 0) {
         free(file_content);
         return ERROR_GENERIC;
     }
     free(file_content);
     return OK;
 }
-int handle_head(const char* request, const char* root_dir) {
-    return ERROR_GENERIC;
+int handle_head(const int client_fd, const char* request, const char* root_dir) {
+    size_t content_length;
+    char* file_content = get_file_content(request, root_dir, &content_length);
+
+    if (!file_content) {
+        return send_404_response(client_fd);
+    }
+    if (send_response(client_fd, request, root_dir, 0, content_length) < 0) {
+        free(file_content);
+        return ERROR_GENERIC;
+    }
+    free(file_content);
+    return OK;
 }
 int handle_post(const char* request, const char* root_dir) {
     return ERROR_GENERIC;
