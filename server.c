@@ -71,7 +71,7 @@ void start_http_server(struct Server *server, const char* root_dir) {
             continue;
         }
 
-        if (handle_response(client_fd, request, root_dir) < 0) {
+        if (handle_request(client_fd, request, root_dir) < 0) {
             continue;
         }
 
