@@ -5,9 +5,9 @@
 #include "../request/request_handler.h"
 #include "../request/request_parser.h"
 #include "../arguments/args_parser.h"
+#include "../logger/logger.h"
 
 #include <unistd.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <netdb.h>
 #include <memory.h>
@@ -22,17 +22,17 @@ struct Server create_server(const int service, const int protocol, const char* s
     server.backlog = backlog;
 
     if (get_address_family(&server) != OK) {
-        perror("Failed to get address family");
+        log_error("Failed to get address family");
         exit(EXIT_FAILURE);
     }
 
     if (init_address(&server) != OK) {
-        perror("Failed to initialize address");
+        log_error("Failed to initialize address");
         exit(EXIT_FAILURE);
     }
 
     if (create_socket(&server) != OK) {
-        perror("Failed to create socket");
+        log_error("Failed to create socket");
         exit(EXIT_FAILURE);
     }
 
@@ -40,20 +40,22 @@ struct Server create_server(const int service, const int protocol, const char* s
     setsockopt(server.socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
 
     if (bind(server.socket, (struct sockaddr*)&server.address, server.address_len) < OK) {
-        perror("Failed to bind socket");
+        log_error("Failed to bind socket");
         exit(EXIT_FAILURE);
     }
 
     if (listen(server.socket, server.backlog) < OK) {
-        perror("Failed to start listening");
+        log_error("Failed to start listening");
         exit(EXIT_FAILURE);
     }
 
+    log_debug("SERVER CREATED");
     return server;
 }
 
 
 void start_http_server(struct Server *server, const char* root_dir) {
+    log_info("SERVER STARTED");
 
     while (1) {
         char request[REQUEST_SIZE] = {0};
@@ -67,10 +69,14 @@ void start_http_server(struct Server *server, const char* root_dir) {
             continue;
         }
 
+        log_debug("REQUEST RECEIVED");
+
         if (handle_request(client_fd, request, root_dir) < 0) {
             continue;
         }
 
+        log_debug("RESPONSE SENT");
+        log_debug("CLOSING CONNECTION");
         shutdown(client_fd, SHUT_RDWR);
         close(client_fd);
     }
@@ -90,7 +96,7 @@ int init_address(struct Server *server) {
         inet_pton(AF_INET6, server->server_interface, &addr6->sin6_addr);
         server->address_len = sizeof(struct sockaddr_in6);
     } else {
-        fprintf(stderr, "Unsupported address family\n");
+        log_error("Unsupported address family\n");
         return ERROR_GENERIC;
     }
     return OK;
@@ -104,7 +110,7 @@ int get_address_family(struct Server *server) {
 
     int err = getaddrinfo(server->server_interface, server->port, &hints, &res);
     if (err != 0) {
-        fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(err));
+        log_error("getaddrinfo: %s", gai_strerror(err));
         return ERROR_GENERIC;
     }
     server->family = res->ai_family;
