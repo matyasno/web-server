@@ -22,6 +22,8 @@ add_executable(web-server main.c
         server/logger/logger.c
         server/logger/logger.h
         server/logger/log_defines.h
+        server/config/config_parser.c
+        server/config/config_parser.h
 )
 
 IF (WIN32)

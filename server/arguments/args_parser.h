@@ -6,9 +6,11 @@
 #define ARGS_PARSER_H
 #include <sys/types.h>
 
-#endif //ARGS_PARSER_H
+#include "../config/config_parser.h"
 
-void parse_args(int argc, char *argv[], int *port, char* server_interface, int *protocol , int *backlog, char* web_directory);
+void parse_args(int argc, char *argv[], server_config *config);
 u_long get_host_order_ip(const char *host_ip);
 int parse_port(const char *host_port);
-int parse_options(const int argc, char **argv);
+int handle_flag(const int argc, char **argv);
+
+#endif //ARGS_PARSER_H

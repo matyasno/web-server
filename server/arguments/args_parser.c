@@ -24,18 +24,32 @@ char* man = "MANUAL\n"
 ;
 
 
-void parse_args(const int argc, char **argv, int *port, char* server_interface, int *protocol , int *backlog, char* web_directory) {
+void parse_args(const int argc, char **argv, server_config *config) {
     if (argc == 2) {
-        parse_options(argc, argv);
+        handle_flag(argc, argv);
         exit(-1);
     }
     if (argc == 5) {
-        parse_options(argc, argv);
-        *port = atoi(argv[3]);
-        *protocol = 0;
-        *backlog = 5;
-        strcpy(server_interface, argv[2]);
-        strcpy(web_directory, argv[4]);
+        handle_flag(argc, argv);
+        strncpy(config->interface, argv[2], MAX_ADDR_LEN - 1);
+        config->interface[MAX_ADDR_LEN - 1] = '\0';
+        strncpy(config->port, argv[3], MAX_PORT_LEN - 1);
+        config->port[MAX_PORT_LEN - 1] = '\0';
+        strncpy(config->web_root, argv[4], PATH_SIZE - 1);
+        config->web_root[PATH_SIZE - 1] = '\0';
+        config->protocol=0;
+        config->backlog=5;
+    }
+    if(argc == 4) {
+        handle_flag(argc, argv);
+        strncpy(config->interface, argv[1], MAX_ADDR_LEN - 1);
+        config->interface[MAX_ADDR_LEN - 1] = '\0';
+        strncpy(config->port, argv[2], MAX_PORT_LEN - 1);
+        config->port[MAX_PORT_LEN - 1] = '\0';
+        strncpy(config->web_root, argv[3], PATH_SIZE - 1);
+        config->web_root[PATH_SIZE - 1] = '\0';
+        config->protocol=0;
+        config->backlog=5;
     }
     if (argc == 1) {
         printf("Usage: <options (optional)> <ip> <port> <dir>\n");
@@ -61,7 +75,7 @@ int parse_port(const char *host_port) {
     return port;
 }
 
-int parse_options(const int argc, char **argv) {
+int handle_flag(const int argc, char **argv) {
     if (strcmp(argv[1], "--help") == 0) {
         printf("%s\n", man);
     }  else if (strcmp(argv[1], "--silent") == 0) {

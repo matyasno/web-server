@@ -19,4 +19,7 @@
 #define HEADER_SIZE 1024
 #define REQUEST_SIZE 1024
 
+#define MAX_ADDR_LEN 40
+#define MAX_PORT_LEN 6
+
 #endif //DEFINES_H
