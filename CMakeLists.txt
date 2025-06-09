@@ -4,21 +4,23 @@ project(web-server)
 set(CMAKE_CXX_STANDARD 20)
 
 add_executable(web-server main.c
-        server.c
-        server.h
-        request_handler.c
-        request_handler.h
-        net_utils.c
-        net_utils.h
-        defines.h
-        request_parser.h
-        request_parser.c
-        file_utils.h
-        file_utils.c
-        response.c
-        response.h
-        args_parser.c
-        args_parser.h
+        server/core/server.c
+        server/core/server.h
+        server/request/request_handler.c
+        server/request/request_handler.h
+        server/utils/net_utils.c
+        server/utils/net_utils.h
+        server/defines.h
+        server/request/request_parser.h
+        server/request/request_parser.c
+        server/utils/file_utils.h
+        server/utils/file_utils.c
+        server/response/response_handler.c
+        server/response/response_handler.h
+        server/arguments/args_parser.c
+        server/arguments/args_parser.h
+        server/logger/logger.c
+        server/logger/logger.h
 )
 
 IF (WIN32)

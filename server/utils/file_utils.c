@@ -3,8 +3,8 @@
 //
 
 #include "file_utils.h"
-#include "request_parser.h"
-#include "defines.h"
+#include "../request/request_parser.h"
+#include "../defines.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

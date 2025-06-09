@@ -4,9 +4,9 @@
 
 #include "request_handler.h"
 #include "request_parser.h"
-#include "file_utils.h"
-#include "response.h"
-#include "defines.h"
+#include "../utils/file_utils.h"
+#include "../response/response_handler.h"
+#include "../defines.h"
 
 #include <stdio.h>
 #include <stdlib.h>

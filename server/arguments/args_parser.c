@@ -10,7 +10,7 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 
-#include "defines.h"
+#include "../defines.h"
 
 void args_check(const int argc, char **argv) {
     if (argc != 4) {

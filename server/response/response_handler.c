@@ -2,10 +2,10 @@
 // Created by matyas on 5/2/25.
 //
 
-#include "response.h"
-#include "defines.h"
-#include "net_utils.h"
-#include "request_parser.h"
+#include "response_handler.h"
+#include "../defines.h"
+#include "../utils/net_utils.h"
+#include "../request/request_parser.h"
 
 #include <string.h>
 #include <stdio.h>

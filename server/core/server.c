@@ -1,10 +1,10 @@
 #include "server.h"
 
-#include "defines.h"
-#include "net_utils.h"
-#include "request_handler.h"
-#include "request_parser.h"
-#include "args_parser.h"
+#include "../defines.h"
+#include "../utils/net_utils.h"
+#include "../request/request_handler.h"
+#include "../request/request_parser.h"
+#include "../arguments/args_parser.h"
 
 #include <unistd.h>
 #include <stdio.h>
@@ -44,7 +44,7 @@ struct Server create_server(const int service, const int protocol, const char* s
         exit(EXIT_FAILURE);
     }
 
-    if (listen(server.socket, backlog) < OK) {
+    if (listen(server.socket, server.backlog) < OK) {
         perror("Failed to start listening");
         exit(EXIT_FAILURE);
     }
@@ -54,13 +54,9 @@ struct Server create_server(const int service, const int protocol, const char* s
 
 
 void start_http_server(struct Server *server, const char* root_dir) {
-    printf("=== SERVER LAUNCHED ===\n");
-    printf("Web directory: %s\n", root_dir);
 
     while (1) {
         char request[REQUEST_SIZE] = {0};
-
-        printf("Waiting for connection...\n");
         const int client_fd = get_client_handle(server);
 
         if (client_fd <= 0) {
@@ -74,8 +70,6 @@ void start_http_server(struct Server *server, const char* root_dir) {
         if (handle_request(client_fd, request, root_dir) < 0) {
             continue;
         }
-
-        printf("Response sent, closing connection.\n\n");
 
         shutdown(client_fd, SHUT_RDWR);
         close(client_fd);

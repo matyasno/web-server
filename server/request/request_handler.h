@@ -5,7 +5,7 @@
 #ifndef SERVUTIL_H
 #define SERVUTIL_H
 
-#include "server.h"
+#include "../core/server.h"
 
 int handle_request(int client_fd,const char* request, const char* root_dir);
 

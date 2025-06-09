@@ -3,7 +3,7 @@
 //
 
 #include "request_parser.h"
-#include "defines.h"
+#include "../defines.h"
 
 #include <unistd.h>
 #include <stdio.h>
@@ -91,5 +91,6 @@ const char* get_mime_type(const char* request, const char* rootDir) {
     if (strcmp(extension, ".gif") == 0) return "image/gif";
     if (strcmp(extension, ".jpg") == 0) return "image/jpeg";
     if (strcmp(extension, ".jpeg") == 0) return "image/jpeg";
+    if (strcmp(extension, ".txt") == 0) return "text/plain";
     return "application/octet-stream";
 }

@@ -3,7 +3,7 @@
 //
 
 #include "net_utils.h"
-#include "defines.h"
+#include "../defines.h"
 
 #include <stdio.h>
 

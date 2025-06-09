@@ -1,5 +1,5 @@
-#include "server.h"
-#include "args_parser.h"
+#include "server/core/server.h"
+#include "server/arguments/args_parser.h"
 
 int main(int argc, char **argv) {
 #ifdef _WIN32
