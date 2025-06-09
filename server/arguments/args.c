@@ -2,7 +2,7 @@
 // Created by matyas on 5/2/25.
 //
 
-#include "args_parser.h"
+#include "args.h"
 
 #include <stdio.h>
 #include <stdlib.h>

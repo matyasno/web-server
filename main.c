@@ -1,5 +1,5 @@
 #include "server/core/server.h"
-#include "server/arguments/args_parser.h"
+#include "server/arguments/args.h"
 #include "server/config/config_parser.h"
 
 int main(int argc, char **argv) {
@@ -15,7 +15,6 @@ int main(int argc, char **argv) {
     struct Server server = create_server(SOCK_STREAM, cfg.protocol, cfg.interface, cfg.port, cfg.backlog);
     start_http_server(&server, cfg.web_root);
     return 0;
-
 #ifdef _WIN32
     WSACleanup();
 #endif

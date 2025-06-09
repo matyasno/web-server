@@ -17,8 +17,8 @@ add_executable(web-server main.c
         server/utils/file_utils.c
         server/response/response_handler.c
         server/response/response_handler.h
-        server/arguments/args_parser.c
-        server/arguments/args_parser.h
+        server/arguments/args.c
+        server/arguments/args.h
         server/logger/logger.c
         server/logger/logger.h
         server/logger/log_defines.h
