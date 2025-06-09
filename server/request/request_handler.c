@@ -7,8 +7,8 @@
 #include "../utils/file_utils.h"
 #include "../response/response_handler.h"
 #include "../defines.h"
+#include "../logger/logger.h"
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -33,7 +33,7 @@ int handle_request(const int client_fd, const char* request, const char* root_di
         }
     }
 
-    fprintf(stderr, "Unknown method: %s\n", method);
+    log_error("Unknown method: %s\n", method);
     return ERROR_GENERIC;
 }
 int handle_get(const int client_fd, const char* request, const char* root_dir) {

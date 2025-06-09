@@ -5,8 +5,10 @@
 #include "file_utils.h"
 #include "../request/request_parser.h"
 #include "../defines.h"
-#include <stdio.h>
+#include "../logger/logger.h"
+
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 
 char* get_file_content(const char* request, const char* root_dir, size_t* outSize) {
@@ -17,7 +19,7 @@ char* get_file_content(const char* request, const char* root_dir, size_t* outSiz
 
     FILE *file = fopen(path, "rb");
     if (file == NULL) {
-        printf("File not found: %s\n", path);
+        log_warning("File not found: %s\n", path);
         return NULL;
     }
 
@@ -28,7 +30,7 @@ char* get_file_content(const char* request, const char* root_dir, size_t* outSiz
 
     char* content = malloc(size+1);
     if (content == NULL) {
-        perror("Failed to allocate memory");
+        log_error("Failed to allocate memory");
         fclose(file);
         return NULL;
     }
@@ -36,7 +38,7 @@ char* get_file_content(const char* request, const char* root_dir, size_t* outSiz
     const size_t bytesRead = fread(content, 1, size, file);
 
     if (bytesRead != size) {
-        perror("Failed to read file");
+        log_error("Failed to read file");
         fclose(file);
         free(content);
         return NULL;

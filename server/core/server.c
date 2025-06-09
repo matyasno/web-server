@@ -69,14 +69,14 @@ void start_http_server(struct Server *server, const char* root_dir) {
             continue;
         }
 
-        log_debug("REQUEST RECEIVED");
+        log_info("REQUEST RECEIVED");
 
         if (handle_request(client_fd, request, root_dir) < 0) {
             continue;
         }
 
-        log_debug("RESPONSE SENT");
-        log_debug("CLOSING CONNECTION");
+        log_info("RESPONSE SENT");
+        log_info("CLOSING CONNECTION");
         shutdown(client_fd, SHUT_RDWR);
         close(client_fd);
     }
