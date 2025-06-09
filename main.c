@@ -9,9 +9,13 @@ int main(int argc, char **argv) {
         exit(1);
     }
 #endif
-
-    args_check(argc, argv);
-    struct Server server = create_server(SOCK_STREAM, 0, argv[1], argv[2], 5);
+    int protocol = 0;
+    int port = 0;
+    int backlog = 0;
+    char server_interface[50] = "";
+    char web_directory[50] = "";
+    parse_args(argc, argv, &port, server_interface, &protocol, &backlog, web_directory);
+    struct Server server = create_server(SOCK_STREAM, protocol, argv[1], argv[2], 5);
     start_http_server(&server, argv[3]);
     return 0;
 

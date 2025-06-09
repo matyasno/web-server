@@ -11,6 +11,11 @@
 #include "logger.h"
 #include "log_defines.h"
 
+int INFO_ENABLED = 1;
+int DEBUG_ENABLED = 0;
+int WARNING_ENABLED = 1;
+int ERROR_ENABLED = 1;
+
 void log_error(const char *format, ...) {
     if (ERROR_ENABLED == 1) {
         fprintf(stderr, RED"[ERROR] " RESET);
@@ -53,4 +58,32 @@ void log_warning(const char *format, ...) {
        va_end(args);
        fputs("\n", stderr);
    }
+}
+
+void error_disable() {
+    ERROR_ENABLED = 0;
+}
+void error_enable() {
+    ERROR_ENABLED = 1;
+}
+
+void warning_disable() {
+    WARNING_ENABLED = 0;
+}
+void warning_enable() {
+    WARNING_ENABLED = 1;
+}
+
+void info_disable() {
+    INFO_ENABLED = 0;
+}
+void info_enable() {
+    INFO_ENABLED = 1;
+}
+
+void debug_disable() {
+    DEBUG_ENABLED = 0;
+}
+void debug_enable() {
+    DEBUG_ENABLED = 1;
 }

@@ -49,7 +49,7 @@ struct Server create_server(const int service, const int protocol, const char* s
         exit(EXIT_FAILURE);
     }
 
-    log_debug("SERVER CREATED");
+    log_info("SERVER CREATED");
     return server;
 }
 
@@ -69,14 +69,14 @@ void start_http_server(struct Server *server, const char* root_dir) {
             continue;
         }
 
-        log_info("REQUEST RECEIVED");
+        log_debug("REQUEST RECEIVED");
 
         if (handle_request(client_fd, request, root_dir) < 0) {
             continue;
         }
 
-        log_info("RESPONSE SENT");
-        log_info("CLOSING CONNECTION");
+        log_debug("RESPONSE SENT");
+        log_debug("CLOSING CONNECTION");
         shutdown(client_fd, SHUT_RDWR);
         close(client_fd);
     }
