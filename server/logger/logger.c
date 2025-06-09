@@ -23,7 +23,6 @@ void log_error(const char *format, ...) {
         va_start(args, format);
         vfprintf(stderr, format, args);
         va_end(args);
-        fputs("\n", stderr);
     }
 }
 
@@ -56,7 +55,6 @@ void log_warning(const char *format, ...) {
        va_start(args, format);
        vfprintf(stderr, format, args);
        va_end(args);
-       fputs("\n", stderr);
    }
 }
 

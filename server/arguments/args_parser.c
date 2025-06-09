@@ -84,7 +84,7 @@ int handle_flag(const int argc, char **argv) {
         info_disable();
         debug_disable();
     } else if (strcmp(argv[1], "--debug") == 0) {
-        debug_disable();
+        debug_enable();
     }
     return ERROR_GENERIC;
 }
