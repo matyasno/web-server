@@ -4,7 +4,7 @@ A simple, multi-platform web server written in C, designed to serve static files
 
 ## Features
 
-* Handles HTTP GET and HEAD requests.
+* Handles HTTP requests.
 * Serves static files from a configurable web root directory.
 * Includes a custom logging system with INFO, DEBUG, WARNING, and ERROR levels.
 * Supports command-line argument parsing for server configuration (interface, port, web root).
