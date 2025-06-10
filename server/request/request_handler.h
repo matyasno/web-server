@@ -8,7 +8,6 @@
 #include "../core/server.h"
 
 int handle_request(int client_fd,const char* request, const char* root_dir);
-
 int handle_get(int client_fd, const char* request, const char* root_dir);
 int handle_head(int client_fd, const char* request, const char* root_dir);
 int handle_post(const char* request, const char* root_dir);
