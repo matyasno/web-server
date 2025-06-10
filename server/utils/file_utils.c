@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
 
 char* get_file_content(const char* request, const char* root_dir, size_t* outSize) {
     char path[PATH_SIZE];
@@ -47,4 +48,9 @@ char* get_file_content(const char* request, const char* root_dir, size_t* outSiz
     content[size] = '\0';
     fclose(file);
     return content;
+}
+
+int write_to_file(int file_fd, const char* content, size_t content_size) {
+    write(file_fd, content, content_size);
+    return OK;
 }

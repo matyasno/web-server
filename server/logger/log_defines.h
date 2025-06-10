@@ -12,4 +12,8 @@
 #define RESET "\x1B[0m"
 #define BOLD "\x1B[1m"
 
+#define LOG_PATH "../../log"
+
+#define MAX_MSG_SIZE 256
+
 #endif //LOG_DEFINES_H
