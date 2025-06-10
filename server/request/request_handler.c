@@ -33,7 +33,7 @@ int handle_request(const int client_fd, const char* request, const char* root_di
         }
     }
 
-    log_warning("Unknown method: %s\n", method);
+    log_warning("Unknown method: %s", method);
     return ERROR_GENERIC;
 }
 int handle_get(const int client_fd, const char* request, const char* root_dir) {

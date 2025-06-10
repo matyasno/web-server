@@ -96,7 +96,7 @@ int init_address(struct Server *server) {
         inet_pton(AF_INET6, server->server_interface, &addr6->sin6_addr);
         server->address_len = sizeof(struct sockaddr_in6);
     } else {
-        log_error("Unsupported address family\n");
+        log_error("Unsupported address family");
         return ERROR_GENERIC;
     }
     return OK;

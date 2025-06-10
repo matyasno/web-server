@@ -18,7 +18,7 @@ int get_client_request(const int client_fd, char* buff, const size_t buff_size) 
         close(client_fd);
         return ERROR_GENERIC;
     } else if (bytesRead == 0) {
-        log_info("Client closed the connection before sending data.\n");
+        log_info("Client closed the connection before sending data.");
         close(client_fd);
         return OK;
     }
