@@ -20,30 +20,66 @@ int ERROR_ENABLED = 1;
 int FILE_ENABLED = 1;
 
 void log_error(const char *format, ...) {
+    char msg[MAX_MSG_SIZE];
     if (ERROR_ENABLED == 1) {
-        fprintf(stderr, RED"[ERROR] " RESET);
+        fprintf(stderr, RED ERROR_PREFIX RESET);
         va_list args;
         va_start(args, format);
-        vfprintf(stderr, format, args);
+        vsnprintf(msg, MAX_MSG_SIZE, format, args);
+        fprintf(stderr, "%s\n", msg);
         va_end(args);
+    }
+    if (ERROR_ENABLED == 1 && FILE_ENABLED == 1) {
+        FILE *file_fd = fopen(LOG_PATH, "a");
+        write_to_file(file_fd, ERROR_PREFIX, strlen(ERROR_PREFIX));
+        write_to_file(file_fd, msg, strlen(msg));
+        write_to_file(file_fd, "\n", 1);
+        fclose(file_fd);
     }
 }
 
 void log_debug(const char *format, ...) {
+    char msg[MAX_MSG_SIZE];
     if (DEBUG_ENABLED == 1) {
-        fprintf(stdout, BLU"[DEBUG] " RESET);
+        fprintf(stdout, BLU DEBUG_PREFIX RESET);
         va_list args;
         va_start(args, format);
-        vfprintf(stdout, format, args);
+        vsnprintf(msg, MAX_MSG_SIZE, format, args);
+        fprintf(stdout, "%s\n", msg);
         va_end(args);
-        fputs("\n", stdout);
+    }
+    if (DEBUG_ENABLED == 1 && FILE_ENABLED == 1) {
+        FILE *file_fd = fopen(LOG_PATH, "a");
+        write_to_file(file_fd, DEBUG_PREFIX, strlen(DEBUG_PREFIX));
+        write_to_file(file_fd, msg, strlen(msg));
+        write_to_file(file_fd, "\n", 1);
+        fclose(file_fd);
     }
 }
 
 void log_info(const char *format, ...) {
+    char msg[MAX_MSG_SIZE];
     if (INFO_ENABLED == 1) {
-        char msg[MAX_MSG_SIZE];
-        fprintf(stdout, GRN"[INFO] " RESET);
+        fprintf(stdout, GRN INFO_PREFIX RESET);
+        va_list args;
+        va_start(args, format);
+        vsnprintf(msg, MAX_MSG_SIZE, format, args);
+        fprintf(stdout, "%s\n", msg);
+        va_end(args);
+    }
+    if (INFO_ENABLED == 1 && FILE_ENABLED == 1) {
+        FILE *file_fd = fopen(LOG_PATH, "a");
+        write_to_file(file_fd, INFO_PREFIX, strlen(INFO_PREFIX));
+        write_to_file(file_fd, msg, strlen(msg));
+        write_to_file(file_fd, "\n", 1);
+        fclose(file_fd);
+    }
+}
+
+void log_warning(const char *format, ...) {
+    char msg[MAX_MSG_SIZE];
+    if (WARNING_ENABLED == 1) {
+        fprintf(stdout, YEL WARN_PREFIX RESET);
         va_list args;
         va_start(args, format);
         vsnprintf(msg, MAX_MSG_SIZE, format, args);
@@ -51,20 +87,12 @@ void log_info(const char *format, ...) {
         va_end(args);
     }
     if (WARNING_ENABLED == 1 && FILE_ENABLED == 1) {
-
+        FILE *file_fd = fopen(LOG_PATH, "a");
+        write_to_file(file_fd, WARN_PREFIX, strlen(WARN_PREFIX));
+        write_to_file(file_fd, msg, strlen(msg));
+        write_to_file(file_fd, "\n", 1);
+        fclose(file_fd);
     }
-}
-
-void log_warning(const char *format, ...) {
-   if (WARNING_ENABLED == 1) {
-       char msg[MAX_MSG_SIZE];
-       fprintf(stderr, YEL"[WARNING] " RESET);
-       va_list args;
-       va_start(args, format);
-       vsnprintf(msg, MAX_MSG_SIZE, format, args);
-       fprintf(stderr, "%s", msg);
-       va_end(args);
-   }
 }
 
 void error_disable() {

@@ -8,7 +8,6 @@
 #include "../logger/logger.h"
 
 #include <stdlib.h>
-#include <stdio.h>
 #include <string.h>
 #include <unistd.h>
 
@@ -20,7 +19,7 @@ char* get_file_content(const char* request, const char* root_dir, size_t* outSiz
 
     FILE *file = fopen(path, "rb");
     if (file == NULL) {
-        log_warning("File not found: %s\n", path);
+        log_warning("File not found: %s", path);
         return NULL;
     }
 
@@ -50,7 +49,15 @@ char* get_file_content(const char* request, const char* root_dir, size_t* outSiz
     return content;
 }
 
-int write_to_file(int file_fd, const char* content, size_t content_size) {
-    write(file_fd, content, content_size);
+int write_to_file(FILE *file_fd, const char* content, size_t content_size) {
+    if (file_fd == NULL) {
+        log_error("Failed to open file");
+    }
+
+    const size_t written_bytes = fwrite(content, 1, content_size, file_fd);
+    if (written_bytes != content_size) {
+        log_error("Failed to write to file");
+        return ERROR_GENERIC;
+    }
     return OK;
 }

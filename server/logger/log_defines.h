@@ -12,7 +12,12 @@
 #define RESET "\x1B[0m"
 #define BOLD "\x1B[1m"
 
-#define LOG_PATH "../../log"
+#define LOG_PATH "../log.txt"
+
+#define DEBUG_PREFIX "[DEBUG] "
+#define INFO_PREFIX "[INFO] "
+#define WARN_PREFIX "[WARN] "
+#define ERROR_PREFIX "[ERROR] "
 
 #define MAX_MSG_SIZE 256
 
