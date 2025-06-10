@@ -8,7 +8,6 @@ A simple, multi-platform web server written in C, designed to serve static files
 * Serves static files from a configurable web root directory.
 * Includes a custom logging system with INFO, DEBUG, WARNING, and ERROR levels.
 * Supports command-line argument parsing for server configuration (interface, port, web root).
-* Provides a 404 Not Found page for non-existent resources.
 * Basic cross-platform compatibility (Windows and Unix-like systems).
 
 ## Building the Project
