@@ -30,7 +30,7 @@ int get_request_method(const char* request, char* buff, const size_t buffSize) {
     char method[METHOD_SIZE], path[PATH_SIZE];
 
     if (sscanf(request, "%7s %255s", method, path) != 2) {
-        log_warning("Invalid request format.\n");
+        log_warning("Invalid request format.");
         return ERROR_GENERIC;
     }
     if (buffSize < strlen(method) + 1) {

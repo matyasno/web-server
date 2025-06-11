@@ -12,6 +12,8 @@ void log_debug(const char *format, ...);
 void log_warning(const char *format, ...);
 void log_info(const char *format, ...);
 
+int write_to_log_file(const char* prefix, const char* msg);
+
 void error_disable();
 void error_enable();
 

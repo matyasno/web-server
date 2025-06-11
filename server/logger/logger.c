@@ -21,8 +21,10 @@ int FILE_ENABLED = 1;
 
 void log_error(const char *format, ...) {
     char msg[MAX_MSG_SIZE];
+    const char* prefix = ERROR_PREFIX;
+
     if (ERROR_ENABLED == 1) {
-        fprintf(stderr, RED ERROR_PREFIX RESET);
+        fprintf(stderr, RED "%s"RESET, prefix);
         va_list args;
         va_start(args, format);
         vsnprintf(msg, MAX_MSG_SIZE, format, args);
@@ -30,18 +32,16 @@ void log_error(const char *format, ...) {
         va_end(args);
     }
     if (ERROR_ENABLED == 1 && FILE_ENABLED == 1) {
-        FILE *file_fd = fopen(LOG_PATH, "a");
-        write_to_file(file_fd, ERROR_PREFIX, strlen(ERROR_PREFIX));
-        write_to_file(file_fd, msg, strlen(msg));
-        write_to_file(file_fd, "\n", 1);
-        fclose(file_fd);
+        write_to_log_file(prefix, msg);
     }
 }
 
 void log_debug(const char *format, ...) {
     char msg[MAX_MSG_SIZE];
+    const char* prefix = DEBUG_PREFIX;
+
     if (DEBUG_ENABLED == 1) {
-        fprintf(stdout, BLU DEBUG_PREFIX RESET);
+        fprintf(stdout, BLU "%s" RESET, prefix);
         va_list args;
         va_start(args, format);
         vsnprintf(msg, MAX_MSG_SIZE, format, args);
@@ -49,18 +49,16 @@ void log_debug(const char *format, ...) {
         va_end(args);
     }
     if (DEBUG_ENABLED == 1 && FILE_ENABLED == 1) {
-        FILE *file_fd = fopen(LOG_PATH, "a");
-        write_to_file(file_fd, DEBUG_PREFIX, strlen(DEBUG_PREFIX));
-        write_to_file(file_fd, msg, strlen(msg));
-        write_to_file(file_fd, "\n", 1);
-        fclose(file_fd);
+        write_to_log_file(prefix, msg);
     }
 }
 
 void log_info(const char *format, ...) {
     char msg[MAX_MSG_SIZE];
+    const char* prefix = INFO_PREFIX;
+
     if (INFO_ENABLED == 1) {
-        fprintf(stdout, GRN INFO_PREFIX RESET);
+        fprintf(stdout, GRN "%s" RESET, prefix);
         va_list args;
         va_start(args, format);
         vsnprintf(msg, MAX_MSG_SIZE, format, args);
@@ -68,16 +66,14 @@ void log_info(const char *format, ...) {
         va_end(args);
     }
     if (INFO_ENABLED == 1 && FILE_ENABLED == 1) {
-        FILE *file_fd = fopen(LOG_PATH, "a");
-        write_to_file(file_fd, INFO_PREFIX, strlen(INFO_PREFIX));
-        write_to_file(file_fd, msg, strlen(msg));
-        write_to_file(file_fd, "\n", 1);
-        fclose(file_fd);
+        write_to_log_file(prefix, msg);
     }
 }
 
 void log_warning(const char *format, ...) {
     char msg[MAX_MSG_SIZE];
+    const char* prefix = WARN_PREFIX;
+
     if (WARNING_ENABLED == 1) {
         fprintf(stdout, YEL WARN_PREFIX RESET);
         va_list args;
@@ -87,12 +83,17 @@ void log_warning(const char *format, ...) {
         va_end(args);
     }
     if (WARNING_ENABLED == 1 && FILE_ENABLED == 1) {
-        FILE *file_fd = fopen(LOG_PATH, "a");
-        write_to_file(file_fd, WARN_PREFIX, strlen(WARN_PREFIX));
-        write_to_file(file_fd, msg, strlen(msg));
-        write_to_file(file_fd, "\n", 1);
-        fclose(file_fd);
+        write_to_log_file(prefix, msg);
     }
+}
+
+int write_to_log_file(const char* prefix, const char* msg) {
+    FILE *file_fd = fopen(LOG_PATH, "a");
+    write_to_file(file_fd, prefix, strlen(prefix));
+    write_to_file(file_fd, msg, strlen(msg));
+    write_to_file(file_fd, "\n", 1);
+    fclose(file_fd);
+    return OK;
 }
 
 void error_disable() {
