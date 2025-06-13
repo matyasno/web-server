@@ -24,12 +24,12 @@ void log_error(const char *format, ...) {
     const char* prefix = ERROR_PREFIX;
 
     if (ERROR_ENABLED == 1) {
-        fprintf(stderr, RED "%s"RESET, prefix);
         va_list args;
         va_start(args, format);
         vsnprintf(msg, MAX_MSG_SIZE, format, args);
-        fprintf(stderr, "%s\n", msg);
         va_end(args);
+        fprintf(stderr, RED "%s"RESET, prefix);
+        fprintf(stderr, "%s\n", msg);
     }
     if (ERROR_ENABLED == 1 && FILE_ENABLED == 1) {
         write_to_log_file(prefix, msg);
@@ -41,12 +41,12 @@ void log_debug(const char *format, ...) {
     const char* prefix = DEBUG_PREFIX;
 
     if (DEBUG_ENABLED == 1) {
-        fprintf(stdout, BLU "%s" RESET, prefix);
         va_list args;
         va_start(args, format);
         vsnprintf(msg, MAX_MSG_SIZE, format, args);
-        fprintf(stdout, "%s\n", msg);
         va_end(args);
+        fprintf(stdout, BLU "%s" RESET, prefix);
+        fprintf(stdout, "%s\n", msg);
     }
     if (DEBUG_ENABLED == 1 && FILE_ENABLED == 1) {
         write_to_log_file(prefix, msg);
@@ -58,12 +58,12 @@ void log_info(const char *format, ...) {
     const char* prefix = INFO_PREFIX;
 
     if (INFO_ENABLED == 1) {
-        fprintf(stdout, GRN "%s" RESET, prefix);
         va_list args;
         va_start(args, format);
         vsnprintf(msg, MAX_MSG_SIZE, format, args);
-        fprintf(stdout, "%s\n", msg);
         va_end(args);
+        fprintf(stdout, GRN "%s" RESET, prefix);
+        fprintf(stdout, "%s\n", msg);
     }
     if (INFO_ENABLED == 1 && FILE_ENABLED == 1) {
         write_to_log_file(prefix, msg);
@@ -75,12 +75,12 @@ void log_warning(const char *format, ...) {
     const char* prefix = WARN_PREFIX;
 
     if (WARNING_ENABLED == 1) {
-        fprintf(stdout, YEL WARN_PREFIX RESET);
         va_list args;
         va_start(args, format);
         vsnprintf(msg, MAX_MSG_SIZE, format, args);
-        fprintf(stdout, "%s\n", msg);
         va_end(args);
+        fprintf(stdout, YEL WARN_PREFIX RESET);
+        fprintf(stdout, "%s\n", msg);
     }
     if (WARNING_ENABLED == 1 && FILE_ENABLED == 1) {
         write_to_log_file(prefix, msg);
