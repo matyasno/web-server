@@ -2,13 +2,17 @@
 // Created by matyas on 09.06.2025.
 //
 #include <stdio.h>
-#include <__stdarg_va_arg.h>
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef WIN32
+#include <stdarg.h>
+#else
+#include <__stdarg_va_arg.h>
+#endif
+
 #include "../defines.h"
 #include "../utils/file_utils.h"
-
 #include "logger.h"
 #include "log_defines.h"
 

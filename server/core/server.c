@@ -9,9 +9,12 @@
 
 #include <unistd.h>
 #include <stdlib.h>
-#include <netdb.h>
 #include <memory.h>
+
+#ifndef _WIN32
 #include <arpa/inet.h>
+#include <netdb.h>
+#endif
 
 struct Server create_server(const int service, const int protocol, const char* server_interface, const char* port, const int backlog) {
     struct Server server;

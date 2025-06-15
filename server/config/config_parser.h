@@ -8,7 +8,7 @@
 #include "../defines.h"
 
 typedef struct {
-    char interface[MAX_ADDR_LEN];
+    char address[MAX_ADDR_LEN];
     char port[MAX_PORT_LEN];
     char web_root[PATH_SIZE];
     int protocol;

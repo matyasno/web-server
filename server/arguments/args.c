@@ -3,16 +3,20 @@
 //
 
 #include "args.h"
+#include "../defines.h"
+#include "../logger/logger.h"
+#include "../logger/log_defines.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#ifdef _WIN32
+#include <winsock2.h>
+#else
 #include <arpa/inet.h>
 #include <netinet/in.h>
-
-#include "../defines.h"
-#include "../logger/logger.h"
-#include "../logger/log_defines.h"
+#endif
 
 char* man = "MANUAL\n"
            BOLD "--silent \n\t" RESET
@@ -31,8 +35,8 @@ void parse_args(const int argc, char **argv, server_config *config) {
     }
     if (argc == 5) {
         handle_flag(argc, argv);
-        strncpy(config->interface, argv[2], MAX_ADDR_LEN - 1);
-        config->interface[MAX_ADDR_LEN - 1] = '\0';
+        strncpy(config->address, argv[2], MAX_ADDR_LEN - 1);
+        config->address[MAX_ADDR_LEN-1] = '\0';
         strncpy(config->port, argv[3], MAX_PORT_LEN - 1);
         config->port[MAX_PORT_LEN - 1] = '\0';
         strncpy(config->web_root, argv[4], PATH_SIZE - 1);
@@ -42,8 +46,8 @@ void parse_args(const int argc, char **argv, server_config *config) {
     }
     if(argc == 4) {
         handle_flag(argc, argv);
-        strncpy(config->interface, argv[1], MAX_ADDR_LEN - 1);
-        config->interface[MAX_ADDR_LEN - 1] = '\0';
+        strncpy(config->address, argv[1], MAX_ADDR_LEN - 1);
+        config->address[MAX_ADDR_LEN - 1] = '\0';
         strncpy(config->port, argv[2], MAX_PORT_LEN - 1);
         config->port[MAX_PORT_LEN - 1] = '\0';
         strncpy(config->web_root, argv[3], PATH_SIZE - 1);

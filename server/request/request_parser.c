@@ -10,9 +10,16 @@
 #include <string.h>
 #include <stdio.h>
 
-int get_client_request(const int client_fd, char* buff, const size_t buff_size) {
-    const ssize_t bytesRead = read(client_fd, buff, buff_size);
+#ifdef _WIN32
+#include <winsock2.h>
+#endif
 
+int get_client_request(const int client_fd, char* buff, const size_t buff_size) {
+#ifdef WIN32
+    const ssize_t bytesRead = recv(client_fd, buff, buff_size, 0);
+#else
+    const ssize_t bytesRead = read(client_fd, buff, buff_size);
+#endif
     if (bytesRead < 0) {
         log_warning("Failed to read request");
         close(client_fd);

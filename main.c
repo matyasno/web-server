@@ -2,6 +2,8 @@
 #include "server/arguments/args.h"
 #include "server/config/config_parser.h"
 
+#include <stdio.h>
+
 int main(int argc, char **argv) {
 #ifdef _WIN32
     WSADATA wsa;
@@ -12,7 +14,7 @@ int main(int argc, char **argv) {
 #endif
     server_config cfg;
     parse_args(argc, argv, &cfg);
-    struct Server server = create_server(SOCK_STREAM, cfg.protocol, cfg.interface, cfg.port, cfg.backlog);
+    struct Server server = create_server(SOCK_STREAM, cfg.protocol, cfg.address, cfg.port, cfg.backlog);
     start_http_server(&server, cfg.web_root);
     return 0;
 #ifdef _WIN32
