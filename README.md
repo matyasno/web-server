@@ -9,6 +9,7 @@ A simple, multi-platform web server written in C, designed to serve static files
 * Includes a custom logging system with INFO, DEBUG, WARNING, and ERROR levels.
 * Supports command-line argument parsing for server configuration (interface, port, web root).
 * Basic cross-platform compatibility (Windows and Unix-like systems).
+* Supports IPv4 and IPv6
 
 ## Building the Project
 
