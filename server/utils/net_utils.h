@@ -8,7 +8,7 @@
 #include <stddef.h>
 #include "../core/server.h"
 
-int get_client_handle(struct Server *server);
+int get_client_fd(struct Server *server);
 int send_client_response(int client_fd, const char* buff, size_t buff_size, int flags);
 
 int send_body(int client_fd, const char* body, size_t body_length, int flags);

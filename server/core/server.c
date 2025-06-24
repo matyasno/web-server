@@ -62,7 +62,7 @@ void start_http_server(struct Server *server, const char* root_dir) {
 
     while (1) {
         char request[REQUEST_SIZE] = {0};
-        const int client_fd = get_client_handle(server);
+        const int client_fd = get_client_fd(server);
 
         if (client_fd <= 0) {
             continue;
