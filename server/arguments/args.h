@@ -5,7 +5,7 @@
 #ifndef ARGS_PARSER_H
 #define ARGS_PARSER_H
 
-#include "../config/config_parser.h"
+#include "../config/config.h"
 
 #ifdef WIN32
 #include <_bsd_types.h>

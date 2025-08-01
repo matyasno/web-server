@@ -1,6 +1,6 @@
 #include "server/core/server.h"
 #include "server/arguments/args.h"
-#include "server/config/config_parser.h"
+#include "server/config/config.h"
 
 #include <stdio.h>
 
