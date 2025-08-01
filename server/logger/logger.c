@@ -10,6 +10,7 @@
 #else
 #include <__stdarg_va_arg.h>
 #endif
+#include <time.h>
 
 #include "../defines.h"
 #include "../utils/file_utils.h"
@@ -22,6 +23,7 @@ int WARNING_ENABLED = 1;
 int ERROR_ENABLED = 1;
 
 int FILE_ENABLED = 1;
+int TIME_STAMP = 1;
 
 void log_error(const char *format, ...) {
     char msg[MAX_MSG_SIZE];
@@ -94,6 +96,18 @@ void log_warning(const char *format, ...) {
 int write_to_log_file(const char* prefix, const char* msg) {
     FILE *file_fd = fopen(LOG_PATH, "a");
     write_to_file(file_fd, prefix, strlen(prefix));
+    if (TIME_STAMP) {
+        time_t t;
+        time(&t);
+
+        struct tm *time = localtime(&t);
+
+        char buffer[64];
+        snprintf(buffer, sizeof(buffer), "%d/%d/%d-%02d:%02d:%02d ", time->tm_mday, time->tm_mon, time->tm_year + 1900,
+                 time->tm_hour, time->tm_min, time->tm_sec);
+
+        write_to_file(file_fd, buffer, strlen(buffer));
+    }
     write_to_file(file_fd, msg, strlen(msg));
     write_to_file(file_fd, "\n", 1);
     fclose(file_fd);
